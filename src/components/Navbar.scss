@@ -1,0 +1,90 @@
+$primary: #28a745;
+$text: #212529;
+$lightBg: #ededed;
+
+.navbar {
+  padding: 0.75% 3%;
+  background-color: white !important;
+
+  .brand {
+    transition: all 0.3s ease 0s;
+    font-size: 1.5rem;
+    font-weight: bold;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .link {
+    transition: all 0.3s ease 0s;
+    color: $text !important;
+
+    &:hover {
+      color: $primary !important;
+    }
+
+    &.active {
+      font-weight: bold;
+      color: $primary !important;
+    }
+  }
+}
+
+// Large devices (desktops, 1200px and up)
+@media (max-width: 1200px) {
+}
+
+// Medium devices (tablets, up to 992px)
+@media (max-width: 992px) {
+}
+
+// Small devices (landscape phones, up to 768px)
+@media (max-width: 768px) {
+  .link {
+    margin: 0;
+    font-size: 105%;
+
+    &.active {
+      padding: 0.3rem 0.75rem;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+  }
+
+  .menu-toggler {
+    padding: 0;
+    border: none;
+
+    .hamburger {
+      margin-top: 15%;
+
+      .btn-line {
+        transition: all 0.3s ease-out;
+        width: 1.75rem;
+        height: 0.125rem;
+        margin-bottom: 5px;
+        background-color: $text;
+      }
+    }
+
+    &.active {
+      .btn-line {
+        background-color: $primary;
+      }
+      .btn-line:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+      .btn-line:nth-child(2) {
+        opacity: 0;
+      }
+      .btn-line:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+      }
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}

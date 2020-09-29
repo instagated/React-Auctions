@@ -1,0 +1,30 @@
+$primary: #28a745;
+$accent: #333;
+
+.breadcrumb {
+  margin-bottom: 0;
+  padding-left: 3%;
+  padding-right: 3%;
+  background-color: $accent;
+
+  .breadcrumb-item {
+    & + .breadcrumb-item::before {
+      content: "›";
+      color: #fff;
+    }
+
+    & > a {
+      transition: all 0.3s ease 0s;
+      color: white;
+
+      &:hover {
+        text-decoration: none;
+        color: $primary;
+      }
+    }
+  }
+
+  .breadcrumb-item.active > a {
+    color: $primary;
+  }
+}

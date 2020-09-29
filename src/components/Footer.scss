@@ -1,0 +1,47 @@
+$primary: #28a745;
+$accent: #333;
+$link: #6c757d;
+
+.footer {
+  .links {
+    padding-right: 2.5%;
+    padding-left: 2.5%;
+    background-color: $accent;
+
+    .row {
+      width: 90%;
+      margin-left: 5% !important;
+    }
+
+    li > a {
+      transition: all 0.3s ease 0s;
+      border-bottom: none !important;
+      color: $link;
+
+      &:hover {
+        text-decoration: none;
+        color: $primary;
+      }
+    }
+  }
+
+  .credits {
+    background-color: $primary;
+
+    p {
+      color: white;
+
+      & > a {
+        transition: all 0.3s ease 0s;
+        color: inherit;
+        border-bottom: 1px dotted white;
+
+        &:hover {
+          text-decoration: none;
+          color: $accent;
+          border-bottom-color: $accent;
+        }
+      }
+    }
+  }
+}

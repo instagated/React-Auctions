@@ -1,0 +1,38 @@
+$primary: #28a745;
+$accent: #333;
+
+.moneybar {
+  background-color: $accent;
+
+  .row {
+    margin: 0;
+    padding: 0.75rem 3%;
+  }
+
+  p {
+    margin: 0%;
+    font-weight: bold;
+    color: white;
+
+    &:hover {
+      cursor: default;
+    }
+
+    .icon {
+      margin-right: 0.5rem;
+      color: $primary;
+    }
+  }
+
+  a {
+    font-weight: bold;
+
+    &:last-of-type {
+      color: $primary;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
