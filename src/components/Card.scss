@@ -1,0 +1,29 @@
+$primary: #28a745;
+$accent: #333;
+
+.card {
+  &.offer {
+    position: relative;
+    background-color: #f8f9fa !important;
+    box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    color: #212529 !important;
+    border: none;
+
+    img {
+      border-radius: 12px;
+    }
+
+    .badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem !important;
+      border-radius: 8px;
+    }
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

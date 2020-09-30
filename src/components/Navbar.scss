@@ -1,15 +1,15 @@
 $primary: #28a745;
 $text: #212529;
-$lightBg: #ededed;
 
 .navbar {
   padding: 0.75% 3%;
   background-color: white !important;
+  box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.15);
 
   .brand {
     transition: all 0.3s ease 0s;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-family: "Quicksand-Bold";
 
     &:hover {
       color: $primary;
@@ -57,14 +57,16 @@ $lightBg: #ededed;
     border: none;
 
     .hamburger {
-      margin-top: 15%;
-
       .btn-line {
         transition: all 0.3s ease-out;
         width: 1.75rem;
         height: 0.125rem;
         margin-bottom: 5px;
         background-color: $text;
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
       }
     }
 

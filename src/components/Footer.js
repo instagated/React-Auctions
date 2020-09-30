@@ -69,7 +69,7 @@ export default class Footer extends Component {
         </div>
 
         <div className="credits">
-          <p className="text text-center py-4">
+          <p className="text text-center py-4 mb-0">
             © 2020 Auction v1.1 by{" "}
             <a href="https://tklein1801.dulliag.de" className="text-link">
               Thorben Klein

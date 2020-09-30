@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPiggyBank, faCashRegister, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
+import { faPiggyBank, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Moneybar.scss";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";

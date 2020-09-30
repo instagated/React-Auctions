@@ -1,5 +1,5 @@
-import React, { Component, useState } from "react";
-import { Navbar, Nav, NavDropdown } from "react-bootstrap";
+import React, { Component } from "react";
+import { Navbar, Nav } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Navbar.scss";
 
@@ -24,7 +24,7 @@ export default class Navigation extends Component {
         </Navbar.Brand>
         <Navbar.Toggle
           onClick={() => this.toggleMenu()}
-          className={this.state.active == false ? "menu-toggler" : "menu-toggler active"}
+          className={this.state.active === false ? "menu-toggler" : "menu-toggler active"}
         >
           <div className="hamburger">
             <div className="btn-line"></div>
@@ -39,7 +39,7 @@ export default class Navigation extends Component {
                 <Nav.Link
                   key={index}
                   href={link.target}
-                  className={link.active == false ? "link" : "link active"}
+                  className={link.active === false ? "link" : "link active"}
                 >
                   {link.name}
                 </Nav.Link>

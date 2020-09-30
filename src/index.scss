@@ -1,3 +1,5 @@
+$primary: #28a745;
+
 html,
 body {
   width: 100%;
@@ -16,6 +18,26 @@ body {
     width: inherit;
     height: inherit;
     background-color: inherit;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 0px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: $primary;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: $primary;
+  }
+  ::selection {
+    background: $primary;
+    color: #fff;
+  }
+  ::-moz-selection {
+    background: $primary;
+    color: #fff;
   }
 }
 
