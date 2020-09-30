@@ -1,4 +1,5 @@
 import React from "react";
+import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
@@ -75,6 +76,30 @@ function App() {
   ];
 
   return (
+    <Router>
+      <div className="App">
+        <Moneybar cash={"50.000 €"} bank={"500.000 €"} />
+        <Navigation links={links} />
+        <Breadcrumb path={["DulliAG", "Auktionen"]} />
+
+        <Switch>
+          <Route path="/Profil/:user">
+            <ProfileScreen />
+          </Route>
+          <Route path="/Angebot/:id">
+            <OfferScreen />
+          </Route>
+          <Route path="/Angebote">
+            <OffersScreen offers={offers} />
+          </Route>
+          <Route path="/">
+            <OffersScreen offers={offers} />
+          </Route>
+        </Switch>
+
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
