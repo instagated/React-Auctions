@@ -59,7 +59,7 @@ export default class Footer extends Component {
             <div className="link-container col-md-4 col-12 px-0">
               <a href="https://zap-hosting.com/a/d9c331376435cc3068016ee7e16d884d41a6f39c">
                 <img
-                  className="w-100"
+                  className="w-100 rounded"
                   src="https://zap-hosting.com/interface/download/images.php?type=affiliate&id=10188"
                   alt="ZAP-Hosting Gameserver and Webhosting"
                 />
