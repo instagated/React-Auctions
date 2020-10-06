@@ -1,0 +1,12 @@
+{
+  "firebaseConfig": {
+    "apiKey": "AIzaSyB8TBnPwGVHWEfOHnrt3muRiKFXt8pL-4Q",
+    "authDomain": "react-auctions.firebaseapp.com",
+    "databaseURL": "https://react-auctions.firebaseio.com",
+    "projectId": "react-auctions",
+    "storageBucket": "react-auctions.appspot.com",
+    "messagingSenderId": "507327593951",
+    "appId": "1:507327593951:web:f1ca8a7aaa5ad308d3d86a",
+    "measurementId": "G-EMN01VTR46"
+  }
+}
