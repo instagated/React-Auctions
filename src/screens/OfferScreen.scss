@@ -21,6 +21,9 @@
         img {
           width: 25%;
           border-radius: 12px;
+          &:hover {
+            cursor: pointer;
+          }
         }
       }
     }
