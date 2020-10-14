@@ -17,7 +17,8 @@ export default class OffersScreen extends Component {
                 <Col
                   xs={12}
                   md={6}
-                  lg={3}
+                  lg={6}
+                  xl={3}
                   key={index}
                   className={
                     this.props.offers.lenth > 4 ? "mb-3 px-0 px-md-4" : "mb-mb-3 px-0 px-md-4"

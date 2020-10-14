@@ -1,6 +1,7 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
 import Loader from "./components/Loader";
+import KeyModal from "./components/KeyModal";
 import Auction from "./Auction";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
@@ -30,7 +31,12 @@ export default class App extends Component {
         {
           active: true,
           name: "Auktionshaus",
-          target: "https://dulliag.de/Auktionen/",
+          target: "https://auktionen.dulliag.de/",
+        },
+        {
+          active: false,
+          name: "EFT Markt",
+          target: "https://eft.dulliag.de/",
         },
         {
           active: false,
@@ -49,10 +55,25 @@ export default class App extends Component {
         },
       ],
       offers: null,
+      cash: null,
+      bank: null,
+      pid: null,
     };
+    this.keyModalRef = createRef();
+    this.moneyBarRef = createRef();
+  }
+
+  getPlayer(apiKey) {
+    return new Promise((res, rej) => {
+      fetch(`https://api.realliferpg.de/v1/player/${apiKey}`)
+        .then((response) => response.json())
+        .then((data) => res(data))
+        .catch((err) => rej(err));
+    });
   }
 
   componentDidMount() {
+    // Get the offers from database
     new Auction().getOffers().then((offers) => {
       let temp = [];
       for (const key in offers) {
@@ -62,13 +83,29 @@ export default class App extends Component {
       }
       this.setState({ offers: temp });
     });
+
+    // Check if the API-Key is set
+    let apiKey = localStorage.getItem("@dag_apiKey");
+    if (apiKey !== null) {
+      this.getPlayer(apiKey).then((playerData) => {
+        let data = playerData.data[0];
+        this.setState({ cash: data.cash, bank: data.bankacc, pid: data.pid });
+      });
+    } else {
+      this.keyModalRef.handleShow();
+    }
   }
 
   render() {
     return (
       <Router>
         <div className="App">
-          <Moneybar cash={"50.000 €"} bank={"500.000 €"} />
+          <KeyModal shown={false} ref={(target) => (this.keyModalRef = target)} />
+          <Moneybar
+            cash={this.state.cash}
+            bank={this.state.bank}
+            ref={(target) => (this.moneyBarRef = target)}
+          />
           <Navigation links={this.state.links} />
           <Breadcrumb path={this.state.path} />
 
@@ -86,7 +123,6 @@ export default class App extends Component {
               {this.state.offers != null ? <OffersScreen offers={this.state.offers} /> : <Loader />}
             </Route>
           </Switch>
-
           <Footer />
         </div>
       </Router>

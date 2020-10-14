@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { version } from "../../package.json";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Footer.scss";
 
@@ -60,7 +61,7 @@ export default class Footer extends Component {
               <a href="https://zap-hosting.com/a/d9c331376435cc3068016ee7e16d884d41a6f39c">
                 <img
                   className="w-100 rounded"
-                  src="https://zap-hosting.com/interface/download/images.php?type=affiliate&id=10188"
+                  src="https://files.dulliag.de/share/zapBanner.jpg"
                   alt="ZAP-Hosting Gameserver and Webhosting"
                 />
               </a>
@@ -70,8 +71,8 @@ export default class Footer extends Component {
 
         <div className="credits">
           <p className="text text-center py-4 mb-0">
-            © 2020 Auction v1.1 by{" "}
-            <a href="https://tklein1801.dulliag.de" className="text-link">
+            © 2020 Auction v{version} by{" "}
+            <a href="https://me.dulliag.de" className="text-link">
               Thorben Klein
             </a>
           </p>
