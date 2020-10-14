@@ -1,3 +1,4 @@
+$light: #f8f9fa;
 $primary: #28a745;
 
 html,
@@ -5,8 +6,7 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: "Quicksand", sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -26,7 +26,6 @@ body {
   }
   ::-webkit-scrollbar-thumb {
     background: $primary;
-    border-radius: 5px;
   }
   ::-webkit-scrollbar-thumb:hover {
     background: $primary;
@@ -38,6 +37,32 @@ body {
   ::-moz-selection {
     background: $primary;
     color: #fff;
+  }
+
+  .form-control {
+    background-color: $light;
+    border-color: $light;
+
+    &:focus {
+      box-shadow: none;
+      border-width: 2px;
+      border-color: $primary;
+      background-color: $light;
+    }
+  }
+
+  .modal .modal-content {
+    border-radius: 5px;
+    .modal-header {
+      border-bottom: 1px solid #ededed;
+      .modal-title {
+        font-weight: bold;
+      }
+    }
+
+    .modal-footer {
+      border-top: 1px solid #ededed;
+    }
   }
 }
 
