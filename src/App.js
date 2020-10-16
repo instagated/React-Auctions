@@ -1,20 +1,20 @@
 import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
+// Screens
+import SignIn from "./screens/sign_in/SignIn";
+import SignUp from "./screens/sign_up/SignUp";
+import Profile from "./screens/profile/Profile";
+import OffersScreen from "./screens/offers/OffersScreen";
+import OfferScreen from "./screens/offer/OfferScreen";
+// Components
 import Loader from "./components/Loader";
 import KeyModal from "./components/KeyModal";
 import Auction from "./Auction";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
-import OffersScreen from "./screens/OffersScreen";
-import OfferScreen from "./screens/OfferScreen";
 import Footer from "./components/Footer";
 import "./App.scss";
-
-function ProfileScreen() {
-  let { user } = useParams();
-  return <h2>Profile of {user}</h2>;
-}
 
 export default class App extends Component {
   constructor() {

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { Col, Row, Button, InputGroup, FormControl } from "react-bootstrap";
-import Auction from "../Auction";
+import Auction from "../../Auction";
+import Loader from "../../components/Loader";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
-import Loader from "../components/Loader";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -43,7 +43,7 @@ export default class OfferScreen extends Component {
               m = m < 10 ? `0${m}` : m,
               s = Math.floor(diff - d * 86400 - h * 3600 - m * 60),
               s = s < 10 ? `0${s}` : s;
-            if (d != 0) {
+            if (d !== 0) {
               d > 1
                 ? this.setState({ countdown: `Verbleibende Zeit: ${d} Tage & ${h}:${m}:${s}` })
                 : this.setState({ countdown: `Verbleibende Zeit: ${d} Tag & ${h}:${m}:${s}` });
@@ -68,7 +68,7 @@ export default class OfferScreen extends Component {
         <section className="offer">
           <div>
             <Row>
-              <Col xs={12} md={8} ld={8} className="px-0 px-md-4">
+              <Col xs={12} md={8} ld={8}>
                 <main>
                   <div className="w-100 mb-3">
                     <img className="thumbnail" src={this.state.thumbnail} alt="Produktbild" />
@@ -98,7 +98,7 @@ export default class OfferScreen extends Component {
                   </div>
                 </main>
               </Col>
-              <Col xs={12} md={4} lg={4} className="px-0 px-md-4">
+              <Col xs={12} md={4} lg={4}>
                 <aside>
                   <div className="d-flex bg-light mb-3 p-3" style={{ borderRadius: 12 }}>
                     <p className="font-weight-bold mb-0">
