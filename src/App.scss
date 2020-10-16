@@ -36,5 +36,12 @@
 @media (max-width: 768px) {
   .App {
     padding: 0;
+
+    section {
+      & > div:first-child {
+        width: 100%;
+        margin: 0;
+      }
+    }
   }
 }

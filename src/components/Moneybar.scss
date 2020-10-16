@@ -1,5 +1,7 @@
 $primary: #28a745;
 $accent: #333;
+$light: #f8f9fa;
+$danger: #dc3545;
 
 .moneybar {
   background-color: $accent;
@@ -13,7 +15,6 @@ $accent: #333;
     margin: 0%;
     font-weight: bold;
     color: white;
-
     &:hover {
       cursor: default;
     }
@@ -26,13 +27,59 @@ $accent: #333;
 
   a {
     font-weight: bold;
-
     &:last-of-type {
       color: $primary;
     }
-
     &:hover {
       text-decoration: none;
+    }
+  }
+
+  .dropdown {
+    margin-left: auto;
+
+    .dropdown-toggle {
+      padding: 0;
+      background-color: transparent !important;
+      border: 0;
+      &::after {
+        border: 0;
+        margin-right: -25%;
+      }
+      &:focus,
+      &:active {
+        box-shadow: none !important;
+      }
+
+      img {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid $primary;
+        border-radius: 50%;
+      }
+    }
+
+    .dropdown-menu {
+      z-index: 1200 !important;
+      padding: 0.5rem;
+      background-color: white;
+      border-radius: 8px;
+
+      .dropdown-item {
+        border-radius: 5px;
+        &:hover {
+          background-color: $light;
+          color: $primary;
+        }
+        // &:first-child {
+        //   text-align: center;
+        //   background-color: $light;
+        //   color: $primary;
+        // }
+        &:last-child {
+          color: $danger;
+        }
+      }
     }
   }
 }

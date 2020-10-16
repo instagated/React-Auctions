@@ -39,15 +39,21 @@ body {
     color: #fff;
   }
 
-  .form-control {
-    background-color: $light;
-    border-color: $light;
+  .form-group {
+    .form-label {
+      margin-bottom: 0;
+    }
 
-    &:focus {
-      box-shadow: none;
-      border-width: 2px;
-      border-color: $primary;
+    .form-control {
       background-color: $light;
+      border-color: $light;
+
+      &:focus {
+        box-shadow: none;
+        border-width: 2px;
+        border-color: $primary;
+        background-color: $light;
+      }
     }
   }
 
