@@ -1,5 +1,6 @@
 import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
+import Firebase from "./Firebase";
 // Screens
 import SignIn from "./screens/sign_in/SignIn";
 import SignUp from "./screens/sign_up/SignUp";
@@ -14,6 +15,7 @@ import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
 import Footer from "./components/Footer";
+//  Stylesheets
 import "./App.scss";
 
 export default class App extends Component {
@@ -72,6 +74,16 @@ export default class App extends Component {
     });
   }
 
+  componentWillMount() {
+    // Check if the user is authentificated
+    Firebase.auth().onAuthStateChanged((user) => {
+      let authentificated = null;
+      // console.log(user.uid);
+      user ? (authentificated = true) : (authentificated = false);
+      this.setState({ user: user, authentificated: authentificated });
+    });
+  }
+
   componentDidMount() {
     // Get the offers from database
     new Auction().getOffers().then((offers) => {
@@ -102,6 +114,8 @@ export default class App extends Component {
         <div className="App">
           <KeyModal shown={false} ref={(target) => (this.keyModalRef = target)} />
           <Moneybar
+            authentificated={this.state.authentificated}
+            displayname={this.state.user != undefined ? this.state.user.displayname : null}
             cash={this.state.cash}
             bank={this.state.bank}
             ref={(target) => (this.moneyBarRef = target)}
@@ -110,13 +124,11 @@ export default class App extends Component {
           <Breadcrumb path={this.state.path} />
 
           <Switch>
-            <Route path="/Profil/:user">
-              <ProfileScreen />
-            </Route>
-            <Route path="/Angebot/:id">
-              <OfferScreen />
-            </Route>
-            <Route path="/Angebote">
+            <Route path="/Anmelden/" component={SignIn} />
+            <Route path="/Registrieren/" component={SignUp} />
+            <Route path="/Profil/" component={Profile} />
+            <Route path="/Angebot/:id" component={OfferScreen} />
+            <Route path="/Angebote/">
               {this.state.offers != null ? <OffersScreen offers={this.state.offers} /> : <Loader />}
             </Route>
             <Route path="/">
