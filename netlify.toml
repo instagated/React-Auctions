@@ -1,0 +1,30 @@
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+force = false
+[[redirects]]
+from = "/Angebot/*"
+to = "/Angebot/:splat"
+status = 200
+force = false
+[[redirects]]
+from = "/Angebote"
+to = "/index.html"
+status = 200
+force = false
+[[redirects]]
+from = "/Profil"
+to = "/Profil"
+status = 200
+force = false
+[[redirects]]
+from = "/Anmelden"
+to = "/Anmelden"
+status = 200
+force = false
+[[redirects]]
+from = "/Registrieren"
+to = "/Registrieren"
+status = 200
+force = false
