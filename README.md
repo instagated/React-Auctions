@@ -18,5 +18,6 @@ _This will be documented later..._
 [React Router](https://reactrouter.com/)
 [Node-SASS](https://www.npmjs.com/package/node-sass)
 [React Bootstrap](https://react-bootstrap.netlify.app/)
+[React Material Toast](https://www.npmjs.com/package/react-material-toast)
 [Firebase](https://firebase.google.com/)
 [FontAwesome](https://fontawesome.com/)

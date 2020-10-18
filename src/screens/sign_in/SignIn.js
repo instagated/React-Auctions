@@ -1,14 +1,17 @@
 import React, { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
+import { toast as toastConfig } from "../../config.json";
 import Firebase from "../../Firebase";
 import Divider from "../../components/Divider";
+import ToastServive from "react-material-toast";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./SignIn.scss";
 
 class SignIn extends Component {
   constructor() {
     super();
+    this.toast = ToastServive.new(toastConfig);
   }
 
   clearForm = () => {
@@ -23,17 +26,27 @@ class SignIn extends Component {
       .signInWithEmailAndPassword(email.value, password.value)
       .then((user) => {
         this.clearForm();
-        this.props.history.push("/");
+        this.toast.success("Du hast dich angemeldet");
+        setTimeout(() => {
+          this.props.history.push("/");
+        }, 2500);
       })
       .catch((err) => {
-        /**
-         * Valid errror codes (err.code)
-         * auth/invalid-email
-         * auth/user-disabled
-         * auth/user-not-found
-         * auth/wrong-password
-         */
-        console.log(err.message);
+        switch (err.code) {
+          case "auth/user-not-found":
+            this.toast.error("Der Benutzer wurde nicht gefunden");
+            break;
+          case "auth/user-disabled":
+            this.toast.error("Der Benutzer wurde gesperrt");
+            break;
+          case "auth/wrong-password":
+            this.toast.error("Das Passwort ist falsch");
+            break;
+          default:
+            this.toast.warning("Der Login ist gescheitert");
+            break;
+        }
+        console.error("Firebase Authentification", err.message);
       });
   };
 

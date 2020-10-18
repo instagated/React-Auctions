@@ -8,5 +8,10 @@
     "messagingSenderId": "507327593951",
     "appId": "1:507327593951:web:f1ca8a7aaa5ad308d3d86a",
     "measurementId": "G-EMN01VTR46"
+  },
+  "toast": {
+    "place": "bottomRight",
+    "duration": 2,
+    "maxCount": 8
   }
 }

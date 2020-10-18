@@ -1,12 +1,19 @@
 import React, { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
+import { toast as toastConfig } from "../../config.json";
 import Firebase from "../../Firebase";
 import Divider from "../../components/Divider";
+import ToastServive from "react-material-toast";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./SignUp.scss";
 
 class SignUp extends Component {
+  constructor() {
+    super();
+    this.toast = ToastServive.new(toastConfig);
+  }
+
   clearForm = () => {
     this.formRef.reset();
   };
@@ -20,16 +27,27 @@ class SignUp extends Component {
       .createUserWithEmailAndPassword(email.value, password.value)
       .then((user) => {
         this.clearForm();
-        this.props.history.push("/");
+        this.toast.success("Dein Benutzer wurde registriert");
+        setTimeout(() => {
+          this.props.history.push("/");
+        }, 2500);
       })
       .catch((err) => {
-        /**
-         * Valid errror codes (err.code)
-         * auth/email-already-in-use
-         * auth/invalid-email
-         * auth/weak-password
-         */
-        console.log(err.message);
+        switch (err.code) {
+          case "auth/email-already-in-use":
+            this.toast.error("Die E-Mail Adresse ist bereits registriert");
+            break;
+          case "auth/invalid-email":
+            this.toast.error("Bitte gib eine gültige E-Mail Adresse ein");
+            break;
+          case "auth/weak-password":
+            this.toast.error("Das Passwort ist zu schwach");
+            break;
+          default:
+            this.toast.warning("Der Benutzer wurde nicht registriert");
+            break;
+        }
+        console.error("Firebase Authentification", err.message);
       });
   };
 
