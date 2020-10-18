@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Offer } from "../../components/Card";
 import Loader from "../../components/Loader";
@@ -11,7 +11,13 @@ export default class OffersScreen extends Component {
     return (
       <section>
         <div>
-          <Row>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "wrap",
+            }}
+          >
             {this.props.offers.map((offer, index) => {
               return offer.expiresAt > now ? (
                 <Col
@@ -20,7 +26,9 @@ export default class OffersScreen extends Component {
                   lg={6}
                   xl={3}
                   key={index}
-                  className={this.props.offers.lenth > 4 ? "mb-3" : "mb-mb-3"}
+                  className={
+                    this.props.offers.lenth > 4 ? "mb-3 px-0 px-md-3" : "mb-mb-3 px-0 px-md-3"
+                  }
                 >
                   <div>
                     <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
@@ -38,7 +46,7 @@ export default class OffersScreen extends Component {
                 <Loader />
               );
             })}
-          </Row>
+          </div>
         </div>
       </section>
     );
