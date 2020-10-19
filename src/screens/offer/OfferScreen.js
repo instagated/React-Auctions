@@ -67,8 +67,14 @@ export default class OfferScreen extends Component {
       return (
         <section className="offer">
           <div>
-            <Row>
-              <Col xs={12} md={8} ld={8}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "wrap",
+              }}
+            >
+              <Col className="px-0 px-md-3" xs={12} md={8} ld={8}>
                 <main>
                   <div className="w-100 mb-3">
                     <img className="thumbnail" src={this.state.thumbnail} alt="Produktbild" />
@@ -98,7 +104,7 @@ export default class OfferScreen extends Component {
                   </div>
                 </main>
               </Col>
-              <Col xs={12} md={4} lg={4}>
+              <Col className="px-0 px-md-3" xs={12} md={4} lg={4}>
                 <aside>
                   <div className="d-flex bg-light mb-3 p-3" style={{ borderRadius: 12 }}>
                     <p className="font-weight-bold mb-0">
@@ -154,7 +160,7 @@ export default class OfferScreen extends Component {
                   </div>
                 </aside>
               </Col>
-            </Row>
+            </div>
           </div>
         </section>
       );

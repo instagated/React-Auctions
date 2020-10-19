@@ -10,7 +10,7 @@ $link: #6c757d;
 
     .row {
       width: 90%;
-      margin-left: 5% !important;
+      margin-left: 5%;
     }
 
     li > a {
@@ -43,5 +43,12 @@ $link: #6c757d;
         }
       }
     }
+  }
+}
+
+@media (max-width: 600px) {
+  footer .links > .row {
+    width: 100% !important;
+    margin-left: 0;
   }
 }
