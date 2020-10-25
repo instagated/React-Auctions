@@ -2,7 +2,7 @@
   main {
     .thumbnail {
       width: 100%;
-      border-radius: 8px;
+      border-radius: 5px;
     }
 
     .image-container {
@@ -20,7 +20,7 @@
 
         img {
           width: 25%;
-          border-radius: 8px;
+          border-radius: 5px;
           &:hover {
             cursor: pointer;
           }

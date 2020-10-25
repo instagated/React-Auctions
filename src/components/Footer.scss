@@ -9,8 +9,7 @@ $link: #6c757d;
     background-color: $accent;
 
     .row {
-      width: 90%;
-      margin-left: 5%;
+      width: 100%;
     }
 
     li > a {
@@ -43,12 +42,5 @@ $link: #6c757d;
         }
       }
     }
-  }
-}
-
-@media (max-width: 600px) {
-  footer .links > .row {
-    width: 100% !important;
-    margin-left: 0;
   }
 }

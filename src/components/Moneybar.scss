@@ -71,11 +71,11 @@ $danger: #dc3545;
           background-color: $light;
           color: $primary;
         }
-        // &:first-child {
-        //   text-align: center;
-        //   background-color: $light;
-        //   color: $primary;
-        // }
+        &:first-child {
+          text-align: center;
+          background-color: $light;
+          color: $primary;
+        }
         &:last-child {
           color: $danger;
         }

@@ -39,6 +39,12 @@ body {
     color: #fff;
   }
 
+  .btn {
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+
   .form-group {
     .form-label {
       margin-bottom: 0;
@@ -46,13 +52,38 @@ body {
 
     .form-control {
       background-color: $light;
-      border-color: $light;
-
+      border: 2px solid $light;
       &:focus {
         box-shadow: none;
         border-width: 2px;
         border-color: $primary;
         background-color: $light;
+      }
+    }
+  }
+
+  .input-group {
+    .form-label {
+      margin-bottom: 0;
+    }
+
+    .form-control {
+      background-color: $light;
+      border: 2px solid $light;
+      &:focus {
+        box-shadow: none;
+        border-width: 2px;
+        border-color: $primary;
+        background-color: $light;
+      }
+    }
+
+    .input-group-append,
+    .input-group-prepend {
+      .input-group-text {
+        background-color: $light;
+        border-top: 2px solid $light;
+        border-bottom: 2px solid $light;
       }
     }
   }
