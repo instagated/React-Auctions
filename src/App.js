@@ -1,5 +1,5 @@
 import React, { Component, createRef } from "react";
-import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Firebase from "./Firebase";
 // Screens
 import SignIn from "./screens/sign_in/SignIn";
@@ -8,7 +8,6 @@ import Profile from "./screens/profile/Profile";
 import OffersScreen from "./screens/offers/OffersScreen";
 import OfferScreen from "./screens/offer/OfferScreen";
 // Components
-import Loader from "./components/Loader";
 import KeyModal from "./components/KeyModal";
 import Auction from "./Auction";
 import Moneybar from "./components/Moneybar";
@@ -55,7 +54,6 @@ export default class App extends Component {
           target: "https://dulliag.de/Support/",
         },
       ],
-      offers: null,
       cash: null,
       bank: null,
       pid: null,
@@ -73,26 +71,13 @@ export default class App extends Component {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     // Check if the user is authentificated
     Firebase.auth().onAuthStateChanged((user) => {
       let authentificated = null;
       // console.log(user.uid);
       user ? (authentificated = true) : (authentificated = false);
       this.setState({ user: user, authentificated: authentificated });
-    });
-  }
-
-  componentDidMount() {
-    // Get the offers from database
-    new Auction().getOffers().then((offers) => {
-      let temp = [];
-      for (const key in offers) {
-        let offer = offers[key];
-        offer.id = key;
-        temp.push(offers[key]);
-      }
-      this.setState({ offers: temp });
     });
 
     // Check if the API-Key is set
@@ -108,31 +93,26 @@ export default class App extends Component {
   }
 
   render() {
+    let { authentificated, cash, bank, links, path } = this.state;
     return (
       <Router>
         <div className="App">
           <KeyModal shown={false} ref={(target) => (this.keyModalRef = target)} />
           <Moneybar
-            authentificated={this.state.authentificated}
-            displayname={this.state.user != undefined ? this.state.user.displayname : null}
-            cash={this.state.cash}
-            bank={this.state.bank}
+            authentificated={authentificated}
+            cash={cash}
+            bank={bank}
             ref={(target) => (this.moneyBarRef = target)}
           />
-          <Navigation links={this.state.links} />
-          <Breadcrumb path={this.state.path} />
-
+          <Navigation links={links} />
+          <Breadcrumb path={path} /> {/* TODO Update the path @ each screen */}
           <Switch>
             <Route path="/Anmelden/" component={SignIn} />
             <Route path="/Registrieren/" component={SignUp} />
             <Route path="/Profil/" component={Profile} />
             <Route path="/Angebot/:id" component={OfferScreen} />
-            <Route path="/Angebote/">
-              {this.state.offers != null ? <OffersScreen offers={this.state.offers} /> : <Loader />}
-            </Route>
-            <Route path="/">
-              {this.state.offers != null ? <OffersScreen offers={this.state.offers} /> : <Loader />}
-            </Route>
+            <Route path="/Angebote/" component={OffersScreen} />
+            <Route path="/" component={OffersScreen} />
           </Switch>
           <Footer />
         </div>
