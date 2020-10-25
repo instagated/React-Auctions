@@ -1,6 +1,6 @@
 <h1 align="center">React Auctions</h1>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/d7b70329-664b-46ab-b0c0-01db0ac55356/deploy-status)](https://app.netlify.com/sites/serene-albattani-49ebba/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/d7b70329-664b-46ab-b0c0-01db0ac55356/deploy-status)](https://app.netlify.com/sites/serene-albattani-49ebba/deploys) [![GitHub version](https://badge.fury.io/gh/tklein1801%2FReact-Auctions.svg)](https://github.com/Naereen/React-Auctions/releases) [![GitHub tag](https://img.shields.io/github/tag/tklein1801/react-auctions.svg)](https://GitHub.com/tklein1801/React-Auctions/tags/) [![Generic badge](https://img.shields.io/badge/Changelogs-Changelog.md-green.svg)](./CHANGELOG.md)
 
 **Demo:** [Current build](https://auktionen.dulliag.de/)
 
