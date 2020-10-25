@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
 import { toast as toastConfig } from "../../config.json";
-import Firebase from "../../Firebase";
+import Firebase, { firestore } from "../../Firebase";
 import Divider from "../../components/Divider";
 import ToastServive from "react-material-toast";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -22,10 +22,14 @@ class SignUp extends Component {
     event.preventDefault();
     // const { username, email, password } = event.target.elements;
     // console.log(username.value, email.value, password.value);
-    const { email, password } = event.target.elements;
+    const { username, email, password } = event.target.elements;
     Firebase.auth()
       .createUserWithEmailAndPassword(email.value, password.value)
-      .then((user) => {
+      .then(() => {
+        let userId = Firebase.auth().currentUser.uid;
+        firestore.collection("user").doc(userId).set({
+          username: username.value,
+        });
         this.clearForm();
         this.toast.success("Dein Benutzer wurde registriert");
         setTimeout(() => {
@@ -58,10 +62,10 @@ class SignUp extends Component {
           <div className="login-container mx-auto">
             <h2 className="text-center">Registrieren</h2>
             <Form onSubmit={this.handleForm} ref={(target) => (this.formRef = target)}>
-              {/* <Form.Group>
+              <Form.Group>
                 <Form.Label className="font-weight-bold">Benutzername</Form.Label>
                 <Form.Control type="text" name="username" />
-              </Form.Group> */}
+              </Form.Group>
               <Form.Group>
                 <Form.Label className="font-weight-bold">E-Mail</Form.Label>
                 <Form.Control type="email" name="email" />
