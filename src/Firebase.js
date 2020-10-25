@@ -1,8 +1,9 @@
 import firebase from "firebase";
-import "firebase/auth";
-const { firebaseConfig } = require("./config.json");
 
+const { firebaseConfig } = require("./config.json");
 const firebaseApp = firebase.initializeApp(firebaseConfig);
+const firestore = firebaseApp.firestore();
 firebaseApp.analytics();
 
+export { firestore };
 export default firebaseApp;
