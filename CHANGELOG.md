@@ -2,8 +2,10 @@
 
 ## :bookmark: [React-Auctions v0.3.0](https://github.com/tklein1801/React-Auctions/releases/tag/v0.3.0)
 
-- Move to Firebase Firestore instead of their old realtime database
 - Add usernames using Firestore
+- Add error messages if no offers were found
+- Move to Firestore instead of using Firebase real-time database
+  - get real-time changes
 - Update the Moneybar-component
 - Remove Bootstrap Row-component
 - Minor style changes
