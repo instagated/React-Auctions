@@ -45,6 +45,11 @@ body {
     }
   }
 
+  .badge {
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+  }
+
   .form-group {
     .form-label {
       margin-bottom: 0;
@@ -99,6 +104,13 @@ body {
 
     .modal-footer {
       border-top: 1px solid #ededed;
+    }
+  }
+
+  .table {
+    margin-bottom: 0;
+    &.no-wrap {
+      white-space: nowrap !important;
     }
   }
 }
