@@ -25,7 +25,7 @@ export default class OffersScreen extends Component {
           now = parseInt((Date.now() / 1000).toFixed(0));
 
         if (change.type === "added") {
-          if (data.expiresAt > now) {
+          if (data.expiresAt.seconds > now) {
             data.id = doc.id;
             temp.push(data);
           }
