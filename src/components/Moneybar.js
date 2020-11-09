@@ -51,13 +51,13 @@ export default class Moneybar extends Component {
               <OverlayTrigger placement="bottom" overlay={<Tooltip>Bargeld</Tooltip>}>
                 <p>
                   <FontAwesomeIcon icon={faMoneyBill} className="icon" />
-                  {`${cash.toLocaleString(undefined)} €`}
+                  {cash !== null ? `${cash.toLocaleString(undefined)} €` : null}
                 </p>
               </OverlayTrigger>
               <OverlayTrigger placement="bottom" overlay={<Tooltip>Kontostand</Tooltip>}>
                 <p className="ml-3">
                   <FontAwesomeIcon icon={faPiggyBank} className="icon" />
-                  {`${bank.toLocaleString(undefined)} €`}
+                  {bank !== null ? `${bank.toLocaleString(undefined)} €` : null}
                 </p>
               </OverlayTrigger>
               <Dropdown>

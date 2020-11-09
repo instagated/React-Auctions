@@ -56,12 +56,25 @@ body {
     }
 
     .form-control {
+      resize: none;
       background-color: $light;
       border: 2px solid $light;
       &:focus {
         box-shadow: none;
         border-width: 2px;
         border-color: $primary;
+        background-color: $light;
+      }
+    }
+
+    .custom-file {
+      .custom-file-label {
+        background-color: $light;
+        border: 2px solid $light;
+      }
+      .custom-file-input:focus ~ .custom-file-label {
+        box-shadow: none !important;
+        border-width: 2px;
         background-color: $light;
       }
     }
@@ -73,6 +86,7 @@ body {
     }
 
     .form-control {
+      resize: none;
       background-color: $light;
       border: 2px solid $light;
       &:focus {

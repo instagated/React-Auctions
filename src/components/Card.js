@@ -17,7 +17,9 @@ export class Offer extends Component {
             <Card.Title className="font-weight-bold mb-0">{props.name}</Card.Title>
             <Card.Text className="text-truncate mb-0">{props.description}</Card.Text>
             <Card.Text className="font-weight-bold">
-              Startpreis: {props.price.toLocaleString(undefined)} €
+              {props.type === 1
+                ? `Gebot: ${props.price.toLocaleString(undefined)} €`
+                : `Preis: ${props.price.toLocaleString(undefined)} €`}
             </Card.Text>
           </Card.Body>
         </Card>

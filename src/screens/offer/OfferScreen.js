@@ -4,6 +4,7 @@ import Loader from "../../components/Loader";
 import Firebase, { firestore } from "../../Firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
+import Auction from "../../Auction";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -35,29 +36,9 @@ export default class OfferScreen extends Component {
           let offer = doc.data();
           offer.id = offerId;
 
-          let countdown = setInterval(() => {
-            let now = Date.now() / 1000,
-              expiresAt = offer.expiresAt.seconds,
-              diff = expiresAt - now;
-            if (diff > 0) {
-              var d = Math.floor(diff / 86400),
-                h = Math.floor((diff - d * 86400) / 3600),
-                h = h < 10 ? `0${h}` : h,
-                m = Math.floor((diff - d * 86400 - h * 3600) / 60),
-                m = m < 10 ? `0${m}` : m,
-                s = Math.floor(diff - d * 86400 - h * 3600 - m * 60),
-                s = s < 10 ? `0${s}` : s;
-              if (d !== 0) {
-                d > 1
-                  ? this.setState({ countdown: `Verbleibende Zeit: ${d} Tage & ${h}:${m}:${s}` })
-                  : this.setState({ countdown: `Verbleibende Zeit: ${d} Tag & ${h}:${m}:${s}` });
-              } else {
-                this.setState({ countdown: `Verbleibende Zeit: ${h}:${m}:${s}` });
-              }
-            } else {
-              clearInterval(countdown);
-              this.setState({ countdown: "Das Angebot ist nicht mehr verfügbar" });
-            }
+          this.setState({ countdown: new Auction().createCountdown(offer.expiresAt.seconds) });
+          setInterval(() => {
+            this.setState({ countdown: new Auction().createCountdown(offer.expiresAt.seconds) });
           }, 1000);
 
           temp.push(offer);

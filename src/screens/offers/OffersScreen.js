@@ -16,32 +16,34 @@ export default class OffersScreen extends Component {
 
   componentDidMount() {
     let temp = [];
+    firestore
+      .collection("offers")
+      .orderBy("createdAt", "desc")
+      .onSnapshot((snapshot) => {
+        let changes = snapshot.docChanges();
+        changes.forEach((change) => {
+          let doc = change.doc,
+            data = doc.data(),
+            now = parseInt((Date.now() / 1000).toFixed(0));
 
-    firestore.collection("offers").onSnapshot((snapshot) => {
-      let changes = snapshot.docChanges();
-      changes.forEach((change) => {
-        let doc = change.doc,
-          data = doc.data(),
-          now = parseInt((Date.now() / 1000).toFixed(0));
-
-        if (change.type === "added") {
-          if (data.expiresAt.seconds > now) {
-            data.id = doc.id;
+          if (change.type === "added") {
+            if (data.expiresAt.seconds > now) {
+              data.id = doc.id;
+              temp.push(data);
+            }
+          } else if (change.type === "removed") {
+            temp = temp.filter((offer) => {
+              return offer.id !== doc.id;
+            });
+          } else if (change.type === "modified") {
+            temp = temp.filter((offer) => {
+              return offer.id !== doc.id;
+            });
             temp.push(data);
           }
-        } else if (change.type === "removed") {
-          temp = temp.filter((offer) => {
-            return offer.id !== doc.id;
-          });
-        } else if (change.type === "modified") {
-          temp = temp.filter((offer) => {
-            return offer.id !== doc.id;
-          });
-          temp.push(data);
-        }
+        });
+        this.setState({ offers: temp, loading: false });
       });
-      this.setState({ offers: temp, loading: false });
-    });
   }
 
   render() {
