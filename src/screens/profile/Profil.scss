@@ -1,0 +1,93 @@
+$avatarWidth: 45%;
+$primary: #28a745;
+$text: #212529;
+
+#profile-container {
+  #avatar {
+    width: $avatarWidth;
+    margin-left: (100% - $avatarWidth) / 2;
+    border-radius: 50%;
+  }
+
+  .form-group {
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .form-control {
+      padding: 0;
+      font-size: 85%;
+    }
+  }
+}
+
+#profile-content {
+  .nav {
+    .nav-link {
+      transition: all 0.3s ease 0s;
+      text-align: center;
+      width: calc(100% / 3);
+      font-weight: bold;
+      color: $text;
+
+      &:hover {
+        color: $primary;
+      }
+
+      &.active {
+        background-color: $primary !important;
+        font-weight: bold;
+        color: white;
+      }
+
+      &#create-offer {
+        width: 100%;
+        margin-top: 1.5rem;
+        background-color: $primary;
+        color: white;
+      }
+    }
+  }
+
+  .offer-column {
+    &:nth-child(odd) {
+      padding-left: 0;
+    }
+
+    &:nth-child(even) {
+      padding-right: 0;
+    }
+  }
+}
+
+// Large devices (desktops, 1200px and up)
+@media (max-width: 1200px) {
+}
+
+// Medium devices (tablets, up to 992px)
+@media (max-width: 992px) {
+}
+
+// Large devices (desktops, 1200px and up)
+@media (max-width: 1200px) {
+}
+
+// Small devices (landscape phones, up to 768px)
+@media (max-width: 768px) {
+  #profile-content {
+    .nav {
+      .nav-link {
+        width: 50%;
+
+        &:nth-child(3) {
+          width: 100%;
+        }
+      }
+    }
+
+    .offer-column {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}

@@ -1,25 +1,6 @@
-import Firebase from "./Firebase";
+import Firebase, { firestore } from "./Firebase";
 
 export default class Auction {
-  /**
-   * @param {number} userId
-   */
-  getSeller(userId) {
-    return new Promise((res, rej) => {
-      Firebase.database()
-        .ref(`auction_user/${userId}`)
-        .on(
-          "value",
-          (response) => {
-            res(response.val());
-          },
-          (error) => {
-            rej(error);
-          }
-        );
-    });
-  }
-
   /**
    * Get avatar by username from eu-avatars
    * @param {string} username
@@ -27,6 +8,26 @@ export default class Auction {
   getAvatar(username) {
     let avatar = `https://eu.ui-avatars.com/api/?name=${username}&size=256&background=fff&color=212529`;
     return avatar;
+  }
+
+  /**
+   * Get an list of all offers create by an specific user
+   * @param {string} uid Firebase Authentification uid
+   */
+  getUserOffers(uid) {
+    return new Promise((res, rej) => {
+      firestore
+        .collection("user")
+        .doc(uid)
+        .get()
+        .then((doc) => res(doc.data().offers))
+        .catch((err) => rej(err));
+    });
+  }
+
+  /**
+   * @param {number} expireDate
+   */
   createCountdown(expireDate) {
     let now = Date.now() / 1000,
       expiresAt = expireDate,
@@ -54,38 +55,115 @@ export default class Auction {
     return countdown;
   }
 
-  getOffers() {
+  /**
+   * @param {string} user Firebase Authentification userId
+   * @param {string} offer Document id which includes the offer data
+   */
+  registerOffer(user, offer) {
     return new Promise((res, rej) => {
-      Firebase.database()
-        .ref("auction_offers")
-        .on(
-          "value",
-          (response) => {
-            res(response.val());
-          },
-          (error) => {
-            rej(error);
-          }
-        );
+      firestore
+        .collection("user")
+        .doc(user)
+        .get()
+        .then((docRef) => {
+          let offerList = docRef.data().offers;
+          offerList.push(offer);
+          firestore.collection("user").doc(user).update({
+            offers: offerList,
+          });
+          res(offerList);
+        })
+        .catch((err) => rej(err));
     });
   }
 
   /**
-   * @param {number} offerId
+   * Upload the offer thumbnail up to our Firebase Storage
+   * @param {string} offer Document Id
+   * @param {File} thumbnail
    */
-  getOffer(offerId) {
+  uploadThumbnail(offer, thumbnail) {
     return new Promise((res, rej) => {
-      Firebase.database()
-        .ref(`auction_offers/${offerId}`)
-        .on(
-          "value",
-          (response) => {
-            res(response.val());
+      const thumbnailRef = Firebase.storage().ref(`offers/${offer}/thumbnail/${thumbnail.name}`),
+        uploadThumbnail = thumbnailRef.put(thumbnail);
+
+      // Upload the thumbnail
+      uploadThumbnail.on(
+        "state_changed",
+        function progress(snapshot) {
+          // Do something...
+        },
+        function error(err) {
+          rej(err);
+        },
+        function complete() {
+          thumbnailRef.getDownloadURL().then((url) => res(url));
+        }
+      );
+    });
+  }
+
+  /**
+   * Upload the product-images in our Firebase Storage
+   * @param {string} offer Document Id
+   * @param {FileList} productImages
+   */
+  uploadProductImages(offer, productImages) {
+    return new Promise((res, rej) => {
+      var images = [];
+      for (let i = 0; i < productImages.length; i++) {
+        const image = productImages[i];
+        const imageRef = Firebase.storage().ref(`offers/${offer}/product/${image.name}`);
+        const task = imageRef.put(image);
+        task.on(
+          "state_changed",
+          function progress(snapshot) {
+            // Do something...
           },
-          (error) => {
+          function error(error) {
             rej(error);
+          },
+          function complete(event) {
+            imageRef.getDownloadURL().then((url) => {
+              images.push(url);
+              if (i == productImages.length - 1) res(images);
+            });
           }
         );
+      }
+    });
+  }
+
+  /**
+   * Create an new offer
+   * @param {string} offerData
+   * @param {File} thumbnail
+   * @param {FileList} productImages
+   */
+  createOffer(offerData, thumbnail, productImages) {
+    return new Promise((res, rej) => {
+      const offerRef = firestore.collection("offers").doc(),
+        offerId = offerRef.id,
+        uploadThumbnail = new Auction().uploadThumbnail(offerId, thumbnail),
+        uploadProductImages = new Auction().uploadProductImages(offerId, productImages),
+        img = { thumbnail: null, product: null };
+
+      Promise.all([uploadThumbnail, uploadProductImages])
+        .then((results) => {
+          img.thumbnail = results[0];
+          img.product = results[1];
+          offerData.images = img;
+          firestore
+            .collection("offers")
+            .doc(offerId)
+            .set(offerData)
+            .then((docRef) => {
+              res(docRef);
+              new Auction().registerOffer(Firebase.auth().currentUser.uid, offerId);
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
     });
   }
 }

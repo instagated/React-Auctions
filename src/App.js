@@ -9,7 +9,6 @@ import OffersScreen from "./screens/offers/OffersScreen";
 import OfferScreen from "./screens/offer/OfferScreen";
 // Components
 import KeyModal from "./components/KeyModal";
-import Auction from "./Auction";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
