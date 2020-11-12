@@ -64,9 +64,6 @@ class SignIn extends Component {
               <Form.Group>
                 <Form.Label className="font-weight-bold">Passwort</Form.Label>
                 <Form.Control type="password" name="password" />
-                <Form.Text className="text-right">
-                  <a href="https://dulliag.de/Support/">Passwort vergessen?</a>
-                </Form.Text>
               </Form.Group>
 
               <div className="d-flex justify-content-center">
