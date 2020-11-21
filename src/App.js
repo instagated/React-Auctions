@@ -20,7 +20,6 @@ export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      path: ["DulliAG", "Auktionen"],
       links: [
         {
           active: false,
@@ -104,7 +103,7 @@ export default class App extends Component {
             ref={(target) => (this.moneyBarRef = target)}
           />
           <Navigation links={links} />
-          <Breadcrumb path={path} /> {/* TODO Update the path @ each screen */}
+          <Breadcrumb />
           <Switch>
             <Route path="/Anmelden/" component={SignIn} />
             <Route path="/Registrieren/" component={SignUp} />
