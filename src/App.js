@@ -9,9 +9,11 @@ import OffersScreen from "./screens/offers/OffersScreen";
 import OfferScreen from "./screens/offer/OfferScreen";
 // Components
 import KeyModal from "./components/KeyModal";
+import { VerifyEmail } from "./components/Modals";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
+import AuthentificationStatus from "./components/AuthentificationStatus";
 import Footer from "./components/Footer";
 //  Stylesheets
 import "./App.scss";
@@ -55,6 +57,7 @@ export default class App extends Component {
       cash: null,
       bank: null,
       pid: null,
+      verified: true,
     };
     this.keyModalRef = createRef();
     this.moneyBarRef = createRef();
@@ -77,6 +80,7 @@ export default class App extends Component {
       user ? (authentificated = true) : (authentificated = false);
       this.setState({ user: user, authentificated: authentificated });
     });
+      const verified = user.emailVerified, // True if the user has already verified his email
 
     // Check if the API-Key is set
     let apiKey = localStorage.getItem("@dag_apiKey");
@@ -88,14 +92,16 @@ export default class App extends Component {
     } else {
       this.keyModalRef.handleShow();
     }
+                verified: verified,
   }
 
   render() {
-    let { authentificated, cash, bank, links, path } = this.state;
+    let { authentificated, verified, cash, bank, links } = this.state;
     return (
       <Router>
         <div className="App">
           <KeyModal shown={false} ref={(target) => (this.keyModalRef = target)} />
+          <VerifyEmail shown={!verified} />
           <Moneybar
             authentificated={authentificated}
             cash={cash}
@@ -104,6 +110,7 @@ export default class App extends Component {
           />
           <Navigation links={links} />
           <Breadcrumb />
+          <AuthentificationStatus />
           <Switch>
             <Route path="/Anmelden/" component={SignIn} />
             <Route path="/Registrieren/" component={SignUp} />
