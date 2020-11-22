@@ -372,22 +372,61 @@ class Profile extends Component {
     super();
     this.state = {
       loading: true,
-      editProfile: true,
+      editProfile: false,
       offerModal: false,
       avatar: "https://files.dulliag.de/web/images/logo.jpg",
     };
+    this.toast = ToastServive.new(toastConfig);
     this.modalRef = createRef();
   }
 
-  handleProfileSubmit = (e) => {};
+  toggleProfileState = () =>
+    this.setState((prevState) => ({
+      editProfile: !prevState.editProfile,
+    }));
+
+  handleProfileSubmit = (e) => {
+    e.preventDefault();
+    const { user } = this.state;
+    const { email, password, apiKey } = e.target.elements,
+      authentificatedUser = Firebase.auth().currentUser;
+    console.log(email.value, password.value, apiKey.value);
+
+    let updateEmail =
+        email.value !== user.email ? authentificatedUser.updateEmail(email.value) : null,
+      updatePassword =
+        password.value !== "" ? authentificatedUser.updatePassword(password.value) : null,
+      updateKey =
+        apiKey.value !== user.apiKey ? localStorage.setItem("@dag_apiKey", apiKey.value) : null;
+
+    this.toggleProfileState();
+    Promise.all([updateEmail, updatePassword, updateKey])
+      .then((results) => {
+        this.toast.success("Die Änderungen wurden gespeichert");
+      })
+      .catch((err) => {
+        console.error(err);
+        switch (err.code) {
+          case "auth/requires-recent-login":
+            const user = Firebase.auth().currentUser,
+              alreadyVerified = user.emailVerified;
+
+            alreadyVerified
+              ? this.toast.info(
+                  "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
+                )
+              : this.toast.error(
+                  "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
+                );
+            break;
+          default:
+            this.toast.error("Die Änderungen konnten nicht gespeichert werden");
+            break;
+        }
+      });
+  };
 
   componentDidMount() {
-    // Check if the API-Key is set
-    let apiKey = localStorage.getItem("@dag_apiKey");
-    apiKey !== null
-      ? this.setState({ apiKey: apiKey })
-      : this.setState({ apiKey: "No api-key found" }) /* this.keyModalRef.handleShow() */;
-
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
@@ -398,7 +437,14 @@ class Profile extends Component {
           .get()
           .then((doc) => {
             user.username = doc.data().username;
-            this.setState({ authentificated: true, loading: false, user: user });
+            user.apiKey = localStorage.getItem("@dag_apiKey");
+            this.setState({
+              authentificated: true,
+              loading: false,
+              user: user,
+              email: user.email,
+              apiKey: localStorage.getItem("@dag_apiKey"),
+            });
           });
       } else {
         this.setState({ authentificated: false, loading: false });
@@ -408,7 +454,7 @@ class Profile extends Component {
 
   render() {
     let { loading, authentificated } = this.state;
-    let { editProfile, avatar, user, apiKey, offerModal } = this.state;
+    let { editProfile, avatar, user, email, apiKey, offerModal } = this.state;
 
     if (loading) {
       return null;
@@ -424,32 +470,56 @@ class Profile extends Component {
                     <form onSubmit={this.handleProfileSubmit}>
                       <p className="font-weight-bold text-center">
                         @{user.username}
-                        <a
-                          className="text-success ml-2"
-                          onClick={() => this.setState({ editProfile: !editProfile })}
-                        >
+                        <a className="text-success ml-2" onClick={() => this.toggleProfileState()}>
                           <FontAwesomeIcon icon={faPencilAlt} className="icon" />
                         </a>
                       </p>
 
-                      <ButtonGroup className="w-100 mb-3">
-                        <Button variant="outline-secondary">Abbrechen</Button>
-                        <Button variant="success">Speichern</Button>
+                      <ButtonGroup className={editProfile ? "w-100 mb-3" : "d-none"}>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => {
+                            this.toggleProfileState();
+                            this.setState({ email: user.email, apiKey: user.apiKey });
+                          }}
+                        >
+                          Abbrechen
+                        </Button>
+                        {/* TODO Submit the new profile data */}
+                        <Button type="submit" variant="success">
+                          Speichern
+                        </Button>
                       </ButtonGroup>
 
                       <Form.Group className="mb-0">
                         <Form.Label className="font-weight-bold">E-Mail</Form.Label>
-                        <Form.Control type="email" id="email" readOnly={editProfile} />
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          readOnly={!editProfile}
+                          value={email}
+                          onChange={(e) => this.setState({ email: e.target.value })}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-0">
                         <Form.Label className="font-weight-bold">Passwort</Form.Label>
-                        <Form.Control type="text" id="password" readOnly={editProfile} />
+                        <Form.Control
+                          type="text"
+                          name="password"
+                          placeholder="Passwort unsichtbar"
+                          onChange={(e) => this.setState({ password: e.target.value })}
+                        />
                       </Form.Group>
 
                       <Form.Group className="mb-0">
                         <Form.Label className="font-weight-bold">API-Key</Form.Label>
-                        <Form.Control type="text" id="api-key" readOnly={editProfile} />
+                        <Form.Control
+                          type="text"
+                          name="apiKey"
+                          value={apiKey}
+                          onChange={(e) => this.setState({ apiKey: e.target.value })}
+                        />
                       </Form.Group>
                     </form>
                   </div>

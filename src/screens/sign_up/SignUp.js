@@ -26,12 +26,29 @@ class SignUp extends Component {
     Firebase.auth()
       .createUserWithEmailAndPassword(email.value, password.value)
       .then(() => {
-        let userId = Firebase.auth().currentUser.uid;
+        const user = Firebase.auth().currentUser,
+          userId = user.uid;
         firestore.collection("user").doc(userId).set({
           username: username.value,
+          bought: [],
+          offers: [],
         });
+
         this.clearForm();
         this.toast.success("Dein Benutzer wurde registriert");
+
+        // Send an account verification email to the user
+        user
+          .sendEmailVerification()
+          .then(() => {
+            this.toast.info("In kürze wirst du eine Bestätigungsemail erhalten");
+          })
+          .catch((err) => {
+            this.toast.warning("Die Bestätigungsemail konnte nicht verschickt werden");
+            console.error(err);
+          });
+
+        // Redirect
         setTimeout(() => {
           this.props.history.push("/");
         }, 2500);
