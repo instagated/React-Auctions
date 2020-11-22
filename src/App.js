@@ -1,6 +1,7 @@
 import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Firebase from "./Firebase";
+import ReallifeRPG from "./ReallifeRPG";
 // Screens
 import SignIn from "./screens/sign_in/SignIn";
 import SignUp from "./screens/sign_up/SignUp";
@@ -8,8 +9,7 @@ import Profile from "./screens/profile/Profile";
 import OffersScreen from "./screens/offers/OffersScreen";
 import OfferScreen from "./screens/offer/OfferScreen";
 // Components
-import KeyModal from "./components/KeyModal";
-import { VerifyEmail } from "./components/Modals";
+import { SetApiKey, VerifyEmail } from "./components/Modals";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
@@ -63,36 +63,30 @@ export default class App extends Component {
     this.moneyBarRef = createRef();
   }
 
-  getPlayer(apiKey) {
-    return new Promise((res, rej) => {
-      fetch(`https://api.realliferpg.de/v1/player/${apiKey}`)
-        .then((response) => response.json())
-        .then((data) => res(data))
-        .catch((err) => rej(err));
-    });
-  }
-
   componentDidMount() {
     // Check if the user is authentificated
     Firebase.auth().onAuthStateChanged((user) => {
-      let authentificated = null;
-      // console.log(user.uid);
-      user ? (authentificated = true) : (authentificated = false);
-      this.setState({ user: user, authentificated: authentificated });
-    });
       const verified = user.emailVerified, // True if the user has already verified his email
+        apiKey = localStorage.getItem("@dag_apiKey");
+      let authentificated = false;
 
-    // Check if the API-Key is set
-    let apiKey = localStorage.getItem("@dag_apiKey");
-    if (apiKey !== null) {
-      this.getPlayer(apiKey).then((playerData) => {
-        let data = playerData.data[0];
-        this.setState({ cash: data.cash, bank: data.bankacc, pid: data.pid });
-      });
-    } else {
-      this.keyModalRef.handleShow();
-    }
+      if (user) {
+        authentificated = true; // Bcause the user is signed in
+        apiKey !== null
+          ? new ReallifeRPG().getPlayer(apiKey).then((playerData) => {
+              let data = playerData.data[0];
+              this.setState({
+                user: user,
+                authentificated: authentificated,
                 verified: verified,
+                cash: data.cash,
+                bank: data.bankacc,
+                pid: data.pid,
+              });
+            })
+          : this.keyModalRef.handleShow();
+      }
+    });
   }
 
   render() {
@@ -100,7 +94,7 @@ export default class App extends Component {
     return (
       <Router>
         <div className="App">
-          <KeyModal shown={false} ref={(target) => (this.keyModalRef = target)} />
+          <SetApiKey shown={false} ref={(target) => (this.keyModalRef = target)} />
           <VerifyEmail shown={!verified} />
           <Moneybar
             authentificated={authentificated}
