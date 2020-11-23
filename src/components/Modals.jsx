@@ -2,7 +2,154 @@ import React, { Component } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import { toast as toastConfig } from "../config.json";
 import ToastService from "react-material-toast";
-import Firebase from "../Firebase";
+import Firebase, { firestore } from "../Firebase";
+import Auction from "../Auction";
+
+class CreateOffer extends Component {
+  constructor(props) {
+    super();
+    this.state = {
+      shown: props.shown,
+    };
+    this.toast = ToastService.new(toastConfig);
+  }
+
+  handleClose = () => this.setState({ shown: false });
+
+  handleShow = () => this.setState({ shown: true });
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+
+    let {
+      type,
+      thumbnail,
+      images,
+      title,
+      price,
+      description,
+      expireDate,
+      expireTime,
+    } = e.target.elements;
+
+    let newOffer = {
+      type: parseInt(type.value),
+      name: title.value,
+      description: description.value,
+      price: parseFloat(price.value),
+      seller: firestore.doc("user/" + Firebase.auth().currentUser.uid),
+      expiresAt: new Date(`${expireDate.value} ${expireTime.value}`),
+      createdAt: new Date(),
+    };
+
+    new Auction()
+      .createOffer(newOffer, thumbnail.files[0], images.files)
+      .then(() => {
+        this.handleClose();
+        this.toast.success(`Das Angebot ${newOffer.name} wurde erstellt`);
+        this.formRef.reset();
+      })
+      .catch((err) => {
+        console.error(err);
+        this.handleClose();
+        this.toast.error("Das Angebot konnte nicht erstellt werden");
+        this.formRef.reset();
+      });
+  };
+
+  render() {
+    return (
+      <Modal show={this.state.shown} onHide={this.handleClose} backdrop="static" size="md" centered>
+        <Modal.Header /*closeButton*/>
+          <Modal.Title id="contained-modal-title-vcenter">Angebot erstellen</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={this.handleSubmit} ref={(target) => (this.formRef = target)}>
+          <Modal.Body className="pb-0">
+            <Form.Group controlId="exampleForm.ControlSelect1">
+              <Form.Label>
+                <strong>Typ</strong>
+              </Form.Label>
+              <Form.Control as="select" name="type">
+                <option value="1">Auktion</option>
+                <option value="2">Sofortkauf</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group className="align-items-center">
+              <Form.Label>
+                <strong>Vorschaubild</strong>
+              </Form.Label>
+              <Form.File
+                name="thumbnail"
+                label="Datei"
+                data-browse="Datei suchen"
+                custom
+                required
+              />
+            </Form.Group>
+            <Form.Group className="align-items-center">
+              <Form.Label>
+                <strong>Produktbilder</strong>
+              </Form.Label>
+              <Form.File name="images" label="Datei" data-browse="Datei suchen" custom multiple />
+            </Form.Group>
+            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+              <Col lg={6} className="px-0 pr-md-3">
+                <Form.Group className="align-items-center">
+                  <Form.Label>
+                    <strong>Artikel</strong>
+                  </Form.Label>
+                  <Form.Control type="text" name="title" required />
+                </Form.Group>
+              </Col>
+
+              <Col lg={6} className="px-0">
+                <Form.Group className="align-items-center">
+                  <Form.Label>
+                    <strong>Preis</strong>
+                  </Form.Label>
+                  <Form.Control type="number" pattern="numeric" name="price" required />
+                </Form.Group>
+              </Col>
+            </div>
+            <Form.Group className="align-items-center">
+              <Form.Label>
+                <strong>Beschreibung</strong>
+              </Form.Label>
+              <Form.Control as="textarea" rows={3} name="description" required />
+            </Form.Group>
+            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+              <Col lg={6} className="px-0 pr-md-3">
+                <Form.Group className="align-items-center">
+                  <Form.Label>
+                    <strong>Enddatum</strong>
+                  </Form.Label>
+                  <Form.Control type="date" name="expireDate" required />
+                </Form.Group>
+              </Col>
+
+              <Col lg={6} className="px-0">
+                <Form.Group className="align-items-center">
+                  <Form.Label>
+                    <strong>Enddatum</strong>
+                  </Form.Label>
+                  <Form.Control type="time" name="expireTime" required />
+                </Form.Group>
+              </Col>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="white" className="px-3 font-weight-bold" onClick={this.handleClose}>
+              Abbrechen
+            </Button>
+            <Button variant="success" className="px-3 font-weight-bold" type="submit">
+              Angebot erstellen
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    );
+  }
+}
 
 class SetApiKey extends Component {
   constructor(props) {
@@ -54,10 +201,10 @@ class SetApiKey extends Component {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" className="px-3" onClick={this.handleClose}>
-              Schließen
+            <Button variant="white" className="px-3 font-weight-bold" onClick={this.handleClose}>
+              Abbrechen
             </Button>
-            <Button variant="success" className="px-3" type="submit">
+            <Button variant="success" className="px-3 font-weight-bold" type="submit">
               Speichern
             </Button>
           </Modal.Footer>
@@ -131,4 +278,4 @@ class VerifyEmail extends Component {
   }
 }
 
-export { SetApiKey, VerifyEmail };
+export { CreateOffer, SetApiKey, VerifyEmail };

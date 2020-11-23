@@ -1,155 +1,16 @@
 import React, { Component, createRef } from "react";
 import { Link, Redirect } from "react-router-dom";
-import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge, Modal } from "react-bootstrap";
+import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
 import Firebase, { firestore } from "../../Firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import Loader from "../../components/Loader";
 import { Offer } from "../../components/Card";
-import Auction from "../../Auction";
 import { toast as toastConfig } from "../../config.json";
-import ToastServive from "react-material-toast";
+import ToastService from "react-material-toast";
+import { CreateOffer } from "../../components/Modals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
-
-class OfferModal extends Component {
-  constructor(props) {
-    super();
-    this.state = {
-      shown: props.shown,
-    };
-    this.toast = ToastServive.new(toastConfig);
-  }
-
-  handleClose = () => this.setState({ shown: false });
-
-  handleShow = () => this.setState({ shown: true });
-
-  handleSubmit = (e) => {
-    e.preventDefault();
-
-    let {
-      type,
-      thumbnail,
-      images,
-      title,
-      price,
-      description,
-      expireDate,
-      expireTime,
-    } = e.target.elements;
-
-    let newOffer = {
-      type: parseInt(type.value),
-      name: title.value,
-      description: description.value,
-      price: parseFloat(price.value),
-      seller: firestore.doc("user/" + Firebase.auth().currentUser.uid),
-      expiresAt: new Date(`${expireDate.value} ${expireTime.value}`),
-      createdAt: new Date(),
-    };
-
-    // FIXME We need to clear the form after submitting it
-    new Auction()
-      .createOffer(newOffer, thumbnail.files[0], images.files)
-      .then(() => {
-        this.handleClose();
-        this.toast.success(`Das Angebot ${newOffer.name} wurde erstellt`);
-      })
-      .catch((err) => {
-        console.error(err);
-        this.handleClose();
-        this.toast.error("Das Angebot konnte nicht erstellt werden");
-      });
-  };
-
-  render() {
-    return (
-      <Modal show={this.state.shown} onHide={this.handleClose} backdrop="static" size="md" centered>
-        <Modal.Header /*closeButton*/>
-          <Modal.Title id="contained-modal-title-vcenter">Angebot erstellen</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={this.handleSubmit}>
-          <Modal.Body className="pb-0">
-            <Form.Group controlId="exampleForm.ControlSelect1">
-              <Form.Label>
-                <strong>Typ</strong>
-              </Form.Label>
-              <Form.Control as="select" name="type">
-                <option value="1">Auktion</option>
-                <option value="2">Sofortkauf</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group className="align-items-center">
-              <Form.Label>
-                <strong>Vorschaubild</strong>
-              </Form.Label>
-              <Form.File name="thumbnail" label="Datei" data-browse="Datei suchen" custom />
-            </Form.Group>
-            <Form.Group className="align-items-center">
-              <Form.Label>
-                <strong>Produktbilder</strong>
-              </Form.Label>
-              <Form.File name="images" label="Datei" data-browse="Datei suchen" custom multiple />
-            </Form.Group>
-            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-              <Col lg={6} className="px-0 pr-md-3">
-                <Form.Group className="align-items-center">
-                  <Form.Label>
-                    <strong>Artikel</strong>
-                  </Form.Label>
-                  <Form.Control type="text" name="title" />
-                </Form.Group>
-              </Col>
-
-              <Col lg={6} className="px-0">
-                <Form.Group className="align-items-center">
-                  <Form.Label>
-                    <strong>Preis</strong>
-                  </Form.Label>
-                  <Form.Control type="number" pattern="numeric" name="price" />
-                </Form.Group>
-              </Col>
-            </div>
-            <Form.Group className="align-items-center">
-              <Form.Label>
-                <strong>Beschreibung</strong>
-              </Form.Label>
-              <Form.Control as="textarea" rows={3} name="description" />
-            </Form.Group>
-            <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-              <Col lg={6} className="px-0 pr-md-3">
-                <Form.Group className="align-items-center">
-                  <Form.Label>
-                    <strong>Enddatum</strong>
-                  </Form.Label>
-                  <Form.Control type="date" name="expireDate" />
-                </Form.Group>
-              </Col>
-
-              <Col lg={6} className="px-0">
-                <Form.Group className="align-items-center">
-                  <Form.Label>
-                    <strong>Enddatum</strong>
-                  </Form.Label>
-                  <Form.Control type="time" name="expireTime" />
-                </Form.Group>
-              </Col>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" className="px-3" onClick={this.handleClose}>
-              Schließen
-            </Button>
-            <Button variant="success" className="px-3" type="submit">
-              Speichern
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-    );
-  }
-}
 
 class BuyHistory extends Component {
   constructor() {
@@ -550,8 +411,7 @@ class Profile extends Component {
                   </Tab.Container>
                 </Col>
               </div>
-
-              <OfferModal shown={offerModal} ref={(target) => (this.modalRef = target)} />
+              <CreateOffer shown={offerModal} ref={(target) => (this.modalRef = target)} />
             </div>
           </section>
         );
@@ -563,5 +423,5 @@ class Profile extends Component {
   }
 }
 
-export { Offers, BuyHistory, SellHistory, OfferModal };
+export { Offers, BuyHistory, SellHistory };
 export default Profile;
