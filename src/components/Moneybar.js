@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { OverlayTrigger, Tooltip, Dropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Firebase, { firestore } from "../Firebase";
+import Firebase from "../Firebase";
+import ReallifeRPG from "../ReallifeRPG";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPiggyBank,
@@ -12,6 +13,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Moneybar.scss";
 
+// TODO Performance needs to be improved by a lot
 export default class Moneybar extends Component {
   constructor() {
     super();
@@ -21,48 +23,44 @@ export default class Moneybar extends Component {
   }
 
   componentDidMount() {
-    let userData = null;
-    Firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        firestore
-          .collection("user")
-          .doc(user.uid)
-          .get()
-          .then((doc) => (userData = doc.data()))
-          .then(() => this.setState({ user: userData, loading: false }));
-      } else {
-        this.setState({ loading: false });
-      }
-    });
+    const apiKey = localStorage.getItem("@dag_apiKey");
+    apiKey !== null && apiKey !== undefined
+      ? new ReallifeRPG()
+          .getPlayer(apiKey)
+          .then((data) => this.setState({ player: data, loading: false }))
+      : this.setState({ loading: false });
   }
 
   render() {
-    let { loading, user } = this.state;
-    let { authentificated, cash, bank } = this.props;
-    // FIXME Get the avatar from the instead of using the DulliAG logo
+    const { loading, player } = this.state,
+      { user } = this.props;
 
     if (loading) {
       return null;
     } else {
-      if (authentificated) {
+      if (user) {
         return (
           <div className="moneybar">
             <div className="row align-items-center">
               <OverlayTrigger placement="bottom" overlay={<Tooltip>Bargeld</Tooltip>}>
                 <p>
                   <FontAwesomeIcon icon={faMoneyBill} className="icon" />
-                  {cash !== null ? `${cash.toLocaleString(undefined)} €` : null}
+                  {player.data[0].cash !== null
+                    ? `${player.data[0].cash.toLocaleString(undefined)} €`
+                    : null}
                 </p>
               </OverlayTrigger>
               <OverlayTrigger placement="bottom" overlay={<Tooltip>Kontostand</Tooltip>}>
                 <p className="ml-3">
                   <FontAwesomeIcon icon={faPiggyBank} className="icon" />
-                  {bank !== null ? `${bank.toLocaleString(undefined)} €` : null}
+                  {player.data[0].bankacc !== null
+                    ? `${player.data[0].bankacc.toLocaleString(undefined)} €`
+                    : null}
                 </p>
               </OverlayTrigger>
               <Dropdown>
                 <Dropdown.Toggle variant="success">
-                  <img src={"https://files.dulliag.de/web/images/logo.jpg"} alt="Profilbild" />
+                  <img src={player.data[0].avatar_full} alt="Profilbild" />
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>

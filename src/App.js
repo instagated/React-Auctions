@@ -1,6 +1,6 @@
 import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Firebase from "./Firebase";
+import Firebase, { firestore } from "./Firebase";
 import ReallifeRPG from "./ReallifeRPG";
 // Screens
 import SignIn from "./screens/sign_in/SignIn";
@@ -68,40 +68,42 @@ export default class App extends Component {
     Firebase.auth().onAuthStateChanged((user) => {
       const verified = user.emailVerified, // True if the user has already verified his email
         apiKey = localStorage.getItem("@dag_apiKey");
-      let authentificated = false;
-
+      let authentificated = false; // Bcause the user is signed in
       if (user) {
-        authentificated = true; // Bcause the user is signed in
-        apiKey !== null
-          ? new ReallifeRPG().getPlayer(apiKey).then((playerData) => {
-              let data = playerData.data[0];
-              this.setState({
-                user: user,
-                authentificated: authentificated,
-                verified: verified,
-                cash: data.cash,
-                bank: data.bankacc,
-                pid: data.pid,
-              });
-            })
-          : this.keyModalRef.handleShow();
+        authentificated = true;
+        const userId = user.uid;
+        firestore
+          .collection("user")
+          .doc(userId)
+          .get()
+          .then((doc) => {
+            user.username = doc.data().username;
+            apiKey !== null
+              ? new ReallifeRPG().getPlayer(apiKey).then((playerData) => {
+                  const data = playerData.data[0];
+                  this.setState({
+                    user: user,
+                    authentificated: authentificated,
+                    verified: verified,
+                    cash: data.cash,
+                    bank: data.bankacc,
+                    pid: data.pid,
+                  });
+                })
+              : this.keyModalRef.handleShow();
+          });
       }
     });
   }
 
   render() {
-    let { authentificated, verified, cash, bank, links } = this.state;
+    let { authentificated, user, verified, cash, bank, links } = this.state;
     return (
       <Router>
         <div className="App">
           <SetApiKey shown={false} ref={(target) => (this.keyModalRef = target)} />
           <VerifyEmail shown={!verified} />
-          <Moneybar
-            authentificated={authentificated}
-            cash={cash}
-            bank={bank}
-            ref={(target) => (this.moneyBarRef = target)}
-          />
+          <Moneybar user={user} ref={(target) => (this.moneyBarRef = target)} />
           <Navigation links={links} />
           <Breadcrumb />
           <AuthentificationStatus />
