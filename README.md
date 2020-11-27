@@ -21,3 +21,5 @@ _This will be documented later..._
 [React Material Toast](https://www.npmjs.com/package/react-material-toast)
 [Firebase](https://firebase.google.com/)
 [FontAwesome](https://fontawesome.com/)
+
+_Have a look on all used ressources [here](./package.json#L5)_

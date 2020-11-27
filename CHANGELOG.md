@@ -1,5 +1,35 @@
 <h1 align="center">Changelogs</h1>
 
+## :bookmark: [React-Auctions v0.4.1](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.1)
+
+#### Hinzugefügt
+
+- **Profil** kann nun bearbeitet werden d.h. du bist nun in der Lage deine Profildaten zu ändern
+  - Bevor du deine E-Mail Adresse ändern kannst musst diese vorher bestätigt werden
+- **Verifizieren** du hast nun die Möglichkeit deine E-Mail Adresse zu bestätigen
+  - Die Verifizierungs email wird nach dem registrieren abgeschickt kann jedoch später auch noch manuell angefordert werden
+- **Angebot**
+  - Angebote löschen
+    - Nur möglich wenn kein Gebot oder Käufer für das Angebot gegeben ist
+  - Weiterleitung & Toast anstelle der Nachricht sollte Angebot nicht gefunden werden
+
+#### Überarbeitet
+
+- **Dateistruktur** wurde ein weniger übersichtlicher gestaltet
+- **Breadcrumb** Pfad ist nun dynamisch (Pfad ändert sich wenn man die Seite wechselt)
+- **Modals** wurden optisch überarbeitet
+  - Modals werden ab sofort in der Datei `./src/components/Modals.jsx` zu finden sein
+- **Profil**
+  - Steam avatar wird nun von der ReallifeRPG API abgerufen & angezeigt
+- **Moneybar** aktualisiert sich gleichzeitig mit dem Authentifizierungsstatus
+  - Steam avatar wird nun von der ReallifeRPG API abgerufen & angezeigt
+
+#### Entfernt
+
+- **Angebote** können temporär nur als Sofortkauf eingestellt werden
+
+---
+
 ## :bookmark: [React-Auctions v0.4.0](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.0)
 
 - Profile
@@ -7,6 +37,8 @@
   - Show created offers
   - Get status of created offers
 - Minor style & component updates
+
+---
 
 ## :bookmark: [React-Auctions v0.3.0](https://github.com/tklein1801/React-Auctions/releases/tag/v0.3.0)
 
@@ -18,10 +50,14 @@
 - Remove Bootstrap Row-component
 - Minor style changes
 
+---
+
 ## :bookmark: [React-Auctions v0.2.1](https://github.com/tklein1801/React-Auctions/releases/tag/v0.2.1)
 
 - Add React Material Toasts
 - Fix Navbar on mobile devices
+
+---
 
 ## :bookmark: [React-Auctions v0.2](https://github.com/tklein1801/React-Auctions/releases/tag/v0.2)
 
