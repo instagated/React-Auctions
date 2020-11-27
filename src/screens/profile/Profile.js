@@ -5,7 +5,18 @@ import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
 // Components
 import { Link, Redirect } from "react-router-dom";
-import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
+import {
+  Col,
+  Form,
+  ButtonGroup,
+  Button,
+  Nav,
+  Tab,
+  Table,
+  Badge,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import Loader from "../../components/Loader";
 import { Offer } from "../../components/Card";
 import { CreateOffer } from "../../components/Modals";
@@ -25,18 +36,92 @@ class BuyHistory extends Component {
   }
 
   componentDidMount() {
-    // TODO Get bought offers from firebase
+    const currentUser = Firebase.auth().currentUser,
+      userId = currentUser.uid;
+    let offerList = [];
+
+    if (currentUser) {
+      firestore
+        .collection("user")
+        .doc(userId)
+        .onSnapshot((snapshot) => {
+          const doc = snapshot.data(),
+            offers = doc.bought;
+
+          if (offers.length > 1) {
+            offers.forEach((offerId) => {
+              new Auction()
+                .getOffer(offerId)
+                .then((offerData) => {
+                  if (offerData.bought !== undefined) {
+                    new Auction()
+                      .getUsername(offerData.bought.uid)
+                      .then((username) => (offerData.bought.username = username));
+                  }
+                  offerList.push(offerData);
+                })
+                .then(() => this.setState({ offers: offerList, loading: false }));
+            });
+          } else {
+            this.setState({ offers: offerList, loading: false });
+          }
+        });
+    }
   }
 
   render() {
-    let { loading } = this.state;
+    let { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
     } else {
       return (
-        <div className="w-100 p-4 bg-light rounded">
-          <h1>Käufe</h1>
+        <div className="w-100 bg-light rounded">
+          <Table className="no-wrap" responsive hover borderless>
+            <thead>
+              <tr className="text-center">
+                <th>Status</th>
+                <th>Typ</th>
+                <th>Angebot</th>
+                <th>Kaufpreis</th>
+              </tr>
+            </thead>
+            <tbody>
+              {offers.length > 0 ? (
+                offers.map((offer, index) => {
+                  return (
+                    <tr key={index} className="text-center">
+                      <td>{offer.type === 2 ? <Badge variant="success">Gekauft</Badge> : null}</td>
+                      <td>
+                        <Badge variant="success">
+                          {offer.type === 1 ? "Auktion" : "Sofortkauf"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Link
+                          to={`/Angebot/${offer.id}`}
+                          className="text-dark text-decoration-none font-weight-bold"
+                        >
+                          {offer.name}
+                        </Link>
+                      </td>
+                      <td>
+                        <p className="font-weight-bold mb-0">
+                          {offer.price.toLocaleString(undefined)} €
+                        </p>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr className="text-center">
+                  <td colSpan="5">
+                    <p className="font-weight-bold mb-0">Keine Angebote gefunden</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
         </div>
       );
     }
