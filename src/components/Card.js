@@ -13,6 +13,16 @@ export class Offer extends Component {
           <Badge className="badge" variant="success">
             {props.type === 1 ? "Auktion" : "Sofortkauf"}
           </Badge>
+          {canDeleted ? (
+            <Button
+              variant="danger"
+              size="sm"
+              className="remove-btn px-3"
+              {/* There is no onClick required bcause the offer can only get deleted @ the OfferScreen */}
+            >
+              Löschen
+            </Button>
+          ) : null}
           <Card.Body>
             <Card.Title className="font-weight-bold mb-0">{props.name}</Card.Title>
             <Card.Text className="text-truncate mb-0">{props.description}</Card.Text>

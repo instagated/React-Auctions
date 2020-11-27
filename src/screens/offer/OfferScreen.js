@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Col, Button, InputGroup, FormControl } from "react-bootstrap";
 import Loader from "../../components/Loader";
 import Firebase, { firestore } from "../../Firebase";
+import { DeleteOffer } from "../../components/Modals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
 import Auction from "../../Auction";
@@ -12,6 +13,7 @@ export default class OfferScreen extends Component {
     this.state = {
       loading: true,
       offerId: window.location.href.split("/")[4],
+      deleteModal: false,
     };
 
     // Check if the user is signed in via Firebase
@@ -81,6 +83,7 @@ export default class OfferScreen extends Component {
       seller,
       thumbnail,
       countdown,
+      deleteModal,
     } = this.state;
 
     if (loading) {
@@ -139,6 +142,20 @@ export default class OfferScreen extends Component {
                         Kontaktieren
                       </Button>
                     </div>
+
+                    {authentificated && user.uid === seller.id ? (
+                      <div className="bg-light rounded mb-3 p-3">
+                        <Button
+                          variant="danger"
+                          className="w-100"
+                          onClick={() => {
+                            this.deleteModal.toggleShow();
+                          }}
+                        >
+                          Angebot löschen
+                        </Button>
+                      </div>
+                    ) : null}
 
                     <div className="bg-light rounded p-3">
                       <h3 className="font-weight-bold">{offer.name}</h3>
@@ -203,6 +220,12 @@ export default class OfferScreen extends Component {
                 </Col>
               </div>
             </div>
+            <DeleteOffer
+              shown={deleteModal}
+              offer={offerId}
+              offerName={offer.name}
+              ref={(target) => (this.deleteModal = target)}
+            />
           </section>
         );
       } else {

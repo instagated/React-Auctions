@@ -166,4 +166,72 @@ export default class Auction {
         .catch((err) => rej(err));
     });
   }
+
+  /**
+   * Delete an offer
+   * @param {string} offer Document Id
+   */
+  deleteOffer(offer) {
+    return new Promise((res, rej) => {
+      let response = {
+        success: null,
+        status: null,
+        message: null,
+      };
+
+      firestore
+        .collection("offers")
+        .doc(offer)
+        .get()
+        .then((doc) => {
+          const offerData = doc.data(),
+            seller = offerData.seller;
+          offerData.id = doc.id;
+          // Check if the document was already sold or if it's an auction if there is already an bid
+          // If the offer was already sold offer.bought should return an object
+          // TODO Check if the offer already received an bid
+          if (offerData.bought === undefined) {
+            const deleteDocument = firestore.collection("offers").doc(offerData.id).delete();
+            const updateProfile = firestore
+              .collection("user")
+              .doc(seller.id)
+              .get()
+              .then((docRef) => {
+                let offerList = docRef.data().offers;
+                let newList = offerList.filter((offerId) => offerId !== offer);
+                firestore.collection("user").doc(seller.id).update({
+                  offers: newList,
+                });
+              });
+
+            Promise.all([deleteDocument, updateProfile])
+              .then((results) => {
+                response = {
+                  success: true,
+                  status: 2,
+                  message: "Das Angebot wurde gelöscht",
+                };
+                res(response);
+              })
+              .catch((err) => {
+                console.error(err);
+                response = {
+                  success: false,
+                  status: 5,
+                  message: "Etwas ist schiefgelaufen",
+                };
+                rej(response);
+              });
+          } else {
+            // The offer was already sold and can't be deleted
+            response = {
+              success: false,
+              status: 5,
+              message: "Das Angebot wurde bereits verkauft",
+            };
+            rej(response);
+          }
+        });
+    });
+  }
 }

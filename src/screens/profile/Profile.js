@@ -207,6 +207,7 @@ class Offers extends Component {
                     <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
                       <Offer
                         type={offer.type}
+                        canDeleted={true}
                         thumbnail={offer.images.thumbnail}
                         name={offer.name}
                         description={offer.description}

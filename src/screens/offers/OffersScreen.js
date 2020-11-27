@@ -70,6 +70,7 @@ export default class OffersScreen extends Component {
                       <div>
                         <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
                           <Offer
+                            canDeleted={false}
                             type={offer.type}
                             thumbnail={offer.images.thumbnail}
                             name={offer.name}

@@ -151,6 +151,75 @@ class CreateOffer extends Component {
   }
 }
 
+class DeleteOffer extends Component {
+  constructor(props) {
+    super();
+    this.state = {
+      shown: props.shown,
+      offer: props.offer,
+    };
+    this.toast = ToastService.new(toastConfig);
+  }
+
+  handleClose = () => {
+    this.setState({ shown: false });
+  };
+
+  handleShow = () => {
+    this.setState({ shown: true });
+  };
+
+  toggleShow = () => {
+    const { shown } = this.state;
+    this.setState({ shown: !shown });
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    const { offer } = this.state;
+    new Auction()
+      .deleteOffer(offer)
+      .then((result) => {
+        console.log(result);
+        this.toast.success("Das Angebot wurde gelöscht");
+        // TODO Redirect to the landingpage
+      })
+      .catch((err) => {
+        console.error(err);
+        this.toast.error("Das Angebot konnte nicht gelöscht werden");
+      });
+    this.handleClose();
+  };
+
+  render() {
+    const { offerName } = this.props;
+
+    return (
+      <Modal show={this.state.shown} onHide={this.handleClose} backdrop="static" size="md" centered>
+        <Modal.Header /*closeButton*/>
+          <Modal.Title id="contained-modal-title-vcenter">Angebot löschen</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={this.handleSubmit}>
+          <Modal.Body className="pb-0">
+            <p>
+              Wollen Sie das Angebot <strong>{offerName}</strong> wirklich löschen? Dieser Vorgang
+              kann nicht rückgängig gemacht werden!
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="white" className="px-3" onClick={this.handleClose}>
+              Abbrechen
+            </Button>
+            <Button variant="success" className="px-3" type="submit">
+              Angebot löschen
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    );
+  }
+}
+
 class SetApiKey extends Component {
   constructor(props) {
     super();
@@ -278,4 +347,4 @@ class VerifyEmail extends Component {
   }
 }
 
-export { CreateOffer, SetApiKey, VerifyEmail };
+export { CreateOffer, DeleteOffer, SetApiKey, VerifyEmail };
