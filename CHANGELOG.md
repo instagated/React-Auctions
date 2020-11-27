@@ -1,5 +1,21 @@
 <h1 align="center">Changelogs</h1>
 
+## :bookmark: [React-Auctions v0.4.2](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.2)
+
+#### Hinzugefügt
+
+- **Kaufhistorie** wurde hinzugefügt. Benutzer können nun einsehen welche Angebote durch sie erworben wurden
+
+#### Überarbeitet
+
+- **Komponenten** werden nun mit der Dateiendung `.jsx` gespeichert
+- **Stylesheets** für einzelne Komponenten werden nun in einem eigenen Verzeichnis gespeichert
+- **Verkaufshistorie** wurde gefixt.
+  - Käufer wird angezeigt
+  - Status wird nun richtig angezeigt
+
+---
+
 ## :bookmark: [React-Auctions v0.4.1](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.1)
 
 #### Hinzugefügt
