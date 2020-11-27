@@ -70,7 +70,7 @@ class CreateOffer extends Component {
                 <strong>Typ</strong>
               </Form.Label>
               <Form.Control as="select" name="type">
-                <option value="1">Auktion</option>
+                {/* <option value="1">Auktion</option> */}
                 <option value="2">Sofortkauf</option>
               </Form.Control>
             </Form.Group>
@@ -138,10 +138,10 @@ class CreateOffer extends Component {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="white" className="px-3 font-weight-bold" onClick={this.handleClose}>
+            <Button variant="white" className="px-3" onClick={this.handleClose}>
               Abbrechen
             </Button>
-            <Button variant="success" className="px-3 font-weight-bold" type="submit">
+            <Button variant="success" className="px-3" type="submit">
               Angebot erstellen
             </Button>
           </Modal.Footer>
@@ -270,10 +270,10 @@ class SetApiKey extends Component {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="white" className="px-3 font-weight-bold" onClick={this.handleClose}>
+            <Button variant="white" className="px-3" onClick={this.handleClose}>
               Abbrechen
             </Button>
-            <Button variant="success" className="px-3 font-weight-bold" type="submit">
+            <Button variant="success" className="px-3" type="submit">
               Speichern
             </Button>
           </Modal.Footer>
@@ -334,10 +334,10 @@ class VerifyEmail extends Component {
             </p>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="white" className="px-3 font-weight-bold" onClick={this.handleClose}>
+            <Button variant="white" className="px-3" onClick={this.handleClose}>
               Abbrechen
             </Button>
-            <Button variant="success" className="px-3 font-weight-bold" onClick={this.handleSubmit}>
+            <Button variant="success" className="px-3" onClick={this.handleSubmit}>
               E-Mail verifizieren
             </Button>
           </Modal.Footer>

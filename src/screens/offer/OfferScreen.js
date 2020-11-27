@@ -1,11 +1,18 @@
 import React, { Component } from "react";
+import Firebase, { firestore } from "../../Firebase";
+import Auction from "../../Auction";
+import ReallifeRPG from "../../ReallifeRPG";
+import { toast as toastConfig } from "../../config.json";
+import ToastServive from "react-material-toast";
+// Components
 import { Col, Button, InputGroup, FormControl } from "react-bootstrap";
 import Loader from "../../components/Loader";
-import Firebase, { firestore } from "../../Firebase";
 import { DeleteOffer } from "../../components/Modals";
+// Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
-import Auction from "../../Auction";
+import { Redirect } from "react-router-dom";
+import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -15,6 +22,15 @@ export default class OfferScreen extends Component {
       offerId: window.location.href.split("/")[4],
       deleteModal: false,
     };
+    this.toast = ToastServive.new(toastConfig);
+  }
+
+  checkBalance(requiredBalance, totalBalance) {
+    return totalBalance >= requiredBalance;
+  }
+
+  componentDidMount() {
+    const { offerId } = this.state;
 
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
@@ -22,44 +38,8 @@ export default class OfferScreen extends Component {
         ? this.setState({ authentificated: true, user: user })
         : this.setState({ authentificated: false });
     });
-  }
 
-  componentDidMount() {
-    let { offerId } = this.state,
-      temp = [];
-
-    // Get the offer from the database
-    firestore
-      .collection("offers")
-      .doc(offerId)
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          let offer = doc.data();
-          offer.id = offerId;
-
-          this.setState({ countdown: new Auction().createCountdown(offer.expiresAt.seconds) });
-          setInterval(() => {
-            this.setState({ countdown: new Auction().createCountdown(offer.expiresAt.seconds) });
-          }, 1000);
-
-          temp.push(offer);
-          offer.seller.get().then((user) => {
-            temp.push(user);
-            this.setState({
-              found: true,
-              offer: temp[0],
-              seller: temp[1],
-              thumbnail: temp[0].images.thumbnail,
-              loading: false,
-            });
-          });
-        } else {
-          this.setState({ loading: false, found: false });
-        }
-      });
-
-    // Get real-tiem document changes & update the state
+    // Get real-time document changes & update the state
     firestore
       .collection("offers")
       .doc(offerId)
@@ -67,7 +47,32 @@ export default class OfferScreen extends Component {
         if (doc.exists) {
           let offer = doc.data();
           offer.id = offerId;
-          this.setState({ offer: offer });
+
+          offer.bought === undefined
+            ? this.setState({
+                countdown: new Auction().createCountdown(offer.expiresAt.seconds),
+              })
+            : this.setState({ countdown: "Das Angebot wurde verkauft" });
+
+          setInterval(() => {
+            offer.bought === undefined
+              ? this.setState({
+                  countdown: new Auction().createCountdown(offer.expiresAt.seconds),
+                })
+              : this.setState({ countdown: "Das Angebot wurde verkauft" });
+          }, 1000);
+
+          offer.seller.get().then((user) => {
+            this.setState({
+              found: true,
+              offer: offer,
+              seller: user,
+              thumbnail: offer.images.thumbnail,
+              loading: false,
+            });
+          });
+        } else {
+          this.setState({ loading: false, found: false });
         }
       });
   }
@@ -163,7 +168,7 @@ export default class OfferScreen extends Component {
                         {offer.price.toLocaleString(undefined)} €
                       </h5>
                       <p className="mb-0">{countdown}</p>
-                      {authentificated && user.uid !== seller.id ? (
+                      {authentificated && user.uid !== seller.id && offer.bought === undefined ? (
                         offer.type === 1 ? (
                           <form
                             ref={(target) => (this.formRef = target)}
@@ -208,7 +213,39 @@ export default class OfferScreen extends Component {
                             </InputGroup>
                           </form>
                         ) : (
-                          <Button className="w-100" variant="success" style={{ borderRadius: 5 }}>
+                          <Button
+                            className="w-100"
+                            variant="success"
+                            onClick={() => {
+                              new ReallifeRPG()
+                                .getPlayer(localStorage.getItem("@dag_apiKey"))
+                                .then((player) => {
+                                  const playerData = player.data[0],
+                                    pid = playerData.pid,
+                                    cash = parseInt(playerData.cash),
+                                    bank = parseInt(playerData.bankacc),
+                                    total = cash + bank;
+
+                                  if (this.checkBalance(offer.price, total)) {
+                                    new Auction()
+                                      .buy(user.uid, pid, offer.id)
+                                      .then((res) => {
+                                        this.toast.success(
+                                          `Du hast den Artikel ${offer.name} gekauft`
+                                        );
+                                      })
+                                      .catch((err) => {
+                                        console.error("[Auctions]", err);
+                                        this.toast.error("Etwas ist schief gelaufen");
+                                      });
+                                  } else {
+                                    this.toast.error(
+                                      "Du hast nicht ausreichend Geld für dieses Angebot"
+                                    );
+                                  }
+                                });
+                            }}
+                          >
                             Kaufen
                           </Button>
                         )
@@ -229,17 +266,7 @@ export default class OfferScreen extends Component {
           </section>
         );
       } else {
-        return (
-          <section>
-            <div>
-              <div className="bg-light mx-auto px-4 py-3 rounded">
-                <h3 className="font-weight-bold text-center mb-0">
-                  Das Angebot <i>{offerId}</i> wurde nicht gefunden
-                </h3>
-              </div>
-            </div>
-          </section>
-        );
+        return <Redirect to="../" />;
       }
     }
   }

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../style/breadcrumb.scss";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 
 class Breadcrumb extends Component {
   constructor() {
@@ -40,7 +40,7 @@ class Breadcrumb extends Component {
                 className={path.length === index + 1 ? "breadcrumb-item active" : "breadcrumb-item"}
                 key={index}
               >
-                <a href="#">{site}</a>
+                <Link to={`../${site}/`}>{site}</Link>
               </li>
             );
           })}

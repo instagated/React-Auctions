@@ -36,18 +36,18 @@ export default class Auction {
     if (diff > 0) {
       var d = Math.floor(diff / 86400),
         h = Math.floor((diff - d * 86400) / 3600),
-        h = h < 10 ? `0${h}` : h,
+        hours = h < 10 ? `0${h}` : h,
         m = Math.floor((diff - d * 86400 - h * 3600) / 60),
-        m = m < 10 ? `0${m}` : m,
+        minutes = m < 10 ? `0${m}` : m,
         s = Math.floor(diff - d * 86400 - h * 3600 - m * 60),
-        s = s < 10 ? `0${s}` : s;
+        seconds = s < 10 ? `0${s}` : s;
       if (d !== 0) {
         countdown =
           d > 1
-            ? `Verbleibende Zeit: ${d} Tage & ${h}:${m}:${s}`
-            : `Verbleibende Zeit: ${d} Tag & ${h}:${m}:${s}`;
+            ? `Verbleibende Zeit: ${d} Tage & ${hours}:${minutes}:${seconds}`
+            : `Verbleibende Zeit: ${d} Tag & ${hours}:${minutes}:${seconds}`;
       } else {
-        countdown = `Verbleibende Zeit: ${h}:${m}:${s}`;
+        countdown = `Verbleibende Zeit: ${hours}:${minutes}:${seconds}`;
       }
     } else {
       countdown = "Das Angebot ist nicht mehr verfügbar";
@@ -72,6 +72,37 @@ export default class Auction {
             offers: offerList,
           });
           res(offerList);
+        })
+        .catch((err) => rej(err));
+    });
+  }
+
+  /**
+   * @param {string} user Firebase Authentification userId
+   * @param {string} pid Steam64Id 76561198356345899
+   * @param {string} offer Document id which includes the offer data
+   */
+  buy(user, pid, offer) {
+    return new Promise((res, rej) => {
+      firestore
+        .collection("offers")
+        .doc(offer)
+        .update({
+          bought: { uid: user, playerId: pid, at: new Date() },
+        })
+        .then(() => {
+          firestore
+            .collection("user")
+            .doc(user)
+            .get()
+            .then((docRef) => {
+              let offerList = docRef.data().bought;
+              offerList.push(offer);
+              firestore.collection("user").doc(user).update({
+                bought: offerList,
+              });
+              res(offerList);
+            });
         })
         .catch((err) => rej(err));
     });
@@ -126,7 +157,7 @@ export default class Auction {
           function complete(event) {
             imageRef.getDownloadURL().then((url) => {
               images.push(url);
-              if (i == productImages.length - 1) res(images);
+              if (i === productImages.length - 1) res(images);
             });
           }
         );

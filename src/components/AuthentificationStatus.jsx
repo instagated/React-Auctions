@@ -11,7 +11,6 @@ export default class AuthentificationStatus extends Component {
 
   componentDidMount() {
     Firebase.auth().onAuthStateChanged((user) => {
-      console.log(user);
       this.setState({ loading: false, signedIn: user, verified: user.emailVerified });
     });
   }

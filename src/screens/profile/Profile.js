@@ -1,16 +1,20 @@
 import React, { Component, createRef } from "react";
-import { Link, Redirect } from "react-router-dom";
-import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
 import Firebase, { firestore } from "../../Firebase";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
-import Loader from "../../components/Loader";
-import { Offer } from "../../components/Card";
+import ReallifeRPG from "../../ReallifeRPG";
 import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
+// Components
+import { Link, Redirect } from "react-router-dom";
+import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
+import Loader from "../../components/Loader";
+import { Offer } from "../../components/Card";
 import { CreateOffer } from "../../components/Modals";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+// Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
+import Auction from "../../Auction";
 
 class BuyHistory extends Component {
   constructor() {
@@ -22,7 +26,6 @@ class BuyHistory extends Component {
 
   componentDidMount() {
     // TODO Get bought offers from firebase
-    let temp = [];
   }
 
   render() {
@@ -111,7 +114,7 @@ class SellHistory extends Component {
                       </td>
                       <td>
                         <Badge variant="success">
-                          {offer.type == 1 ? "Auktion" : "Sofortkauf"}
+                          {offer.type === 1 ? "Auktion" : "Sofortkauf"}
                         </Badge>
                       </td>
                       <td>
@@ -180,7 +183,11 @@ class Offers extends Component {
             .then((doc) => {
               const offer = doc.data(),
                 now = Date.now() / 1000;
-              if (offer.expiresAt.seconds > now && !ids.includes(offerId)) {
+              if (
+                offer.expiresAt.seconds > now &&
+                !ids.includes(offerId) &&
+                offer.bought === undefined
+              ) {
                 offer.id = offerId;
                 ids.push(offerId);
                 offerList.push(offer);
@@ -236,9 +243,8 @@ class Profile extends Component {
       loading: true,
       editProfile: false,
       offerModal: false,
-      avatar: "https://files.dulliag.de/web/images/logo.jpg",
     };
-    this.toast = ToastServive.new(toastConfig);
+    this.toast = ToastService.new(toastConfig);
     this.modalRef = createRef();
   }
 
@@ -263,7 +269,7 @@ class Profile extends Component {
 
     this.toggleProfileState();
     Promise.all([updateEmail, updatePassword, updateKey])
-      .then((results) => {
+      .then(() => {
         this.toast.success("Die Änderungen wurden gespeichert");
       })
       .catch((err) => {
@@ -272,7 +278,7 @@ class Profile extends Component {
           case "auth/requires-recent-login":
             const user = Firebase.auth().currentUser,
               alreadyVerified = user.emailVerified;
-
+            // We're gonna check if the email is already verified bcause if he is he only need to relog
             alreadyVerified
               ? this.toast.info(
                   "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
@@ -292,7 +298,7 @@ class Profile extends Component {
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        let userId = user.uid;
+        const userId = user.uid;
         firestore
           .collection("user")
           .doc(userId)
@@ -300,12 +306,17 @@ class Profile extends Component {
           .then((doc) => {
             user.username = doc.data().username;
             user.apiKey = localStorage.getItem("@dag_apiKey");
-            this.setState({
-              authentificated: true,
-              loading: false,
-              user: user,
-              email: user.email,
-              apiKey: localStorage.getItem("@dag_apiKey"),
+            const avatar = new ReallifeRPG().getPlayer(user.apiKey);
+            avatar.then((response) => {
+              const avatar_full = response.data[0].avatar_full;
+              this.setState({
+                authentificated: true,
+                loading: false,
+                avatar: avatar_full,
+                user: user,
+                email: user.email,
+                apiKey: localStorage.getItem("@dag_apiKey"),
+              });
             });
           });
       } else {
