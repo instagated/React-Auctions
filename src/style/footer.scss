@@ -1,6 +1,4 @@
-$primary: #28a745;
-$accent: #333;
-$link: #6c757d;
+@import "./variables";
 
 .footer {
   .links {
@@ -15,7 +13,7 @@ $link: #6c757d;
     li > a {
       transition: all 0.3s ease 0s;
       border-bottom: none !important;
-      color: $link;
+      color: $footerLink;
 
       &:hover {
         text-decoration: none;

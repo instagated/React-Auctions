@@ -1,5 +1,4 @@
-$primary: #28a745;
-$text: #212529;
+@import "./_variables";
 
 .navbar {
   padding: 0.75% 3%;
@@ -18,7 +17,7 @@ $text: #212529;
 
   .link {
     transition: all 0.3s ease 0s;
-    color: $text !important;
+    color: $textColor !important;
 
     &:hover {
       color: $primary !important;
@@ -47,7 +46,7 @@ $text: #212529;
 
     &.active {
       padding: 0.3rem 0.75rem;
-      background-color: #f8f9fa;
+      background-color: $lightBackground;
       border-radius: 5px;
     }
   }
@@ -62,7 +61,7 @@ $text: #212529;
         width: 1.75rem;
         height: 0.125rem;
         margin-bottom: 5px;
-        background-color: $text;
+        background-color: $textColor;
 
         &:last-of-type {
           margin-bottom: 0;

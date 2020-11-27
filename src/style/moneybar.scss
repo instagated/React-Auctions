@@ -1,7 +1,4 @@
-$primary: #28a745;
-$accent: #333;
-$light: #f8f9fa;
-$danger: #dc3545;
+@import "./variables";
 
 .moneybar {
   background-color: $accent;
@@ -68,7 +65,7 @@ $danger: #dc3545;
       .dropdown-item {
         border-radius: 5px;
         &:hover {
-          background-color: $light;
+          background-color: $lightBackground;
           color: $primary;
         }
         &:first-child {

@@ -11,7 +11,7 @@ import {
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Moneybar.scss";
+import "../style/moneybar.scss";
 
 // TODO Performance needs to be improved by a lot
 export default class Moneybar extends Component {

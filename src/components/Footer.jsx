@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { version } from "../../package.json";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Footer.scss";
+import "../style/footer.scss";
 
 export default class Footer extends Component {
   render() {

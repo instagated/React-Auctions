@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./Divider.scss";
+import "../style/divider.scss";
 
 export default class Divider extends Component {
   render() {

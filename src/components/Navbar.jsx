@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Navbar.scss";
+import "../style/navbar.scss";
 
 export default class Navigation extends Component {
   constructor() {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Spinner } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Loader.scss";
+import "../style/loader.scss";
 
 export default class Loader extends Component {
   render() {

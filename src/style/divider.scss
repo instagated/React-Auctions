@@ -1,3 +1,4 @@
+@import "./variables";
 /* 
    * Divider
    * by https://codepen.io/scottzirkel/pen/yNxNME
@@ -8,7 +9,7 @@ hr.divider {
   line-height: 1em;
   height: 1.5em;
   margin: 1rem 0;
-  color: black;
+  color: $dividerColor;
   opacity: 0.5;
   border: 0;
   outline: 0;
@@ -20,7 +21,7 @@ hr.divider {
     left: 0;
     width: 100%;
     height: 1px;
-    background-color: #818078;
+    background-color: $dividerBackground;
   }
 
   &:after {
@@ -30,6 +31,6 @@ hr.divider {
     padding: 0 0.5em;
     line-height: 1.5em;
     background-color: white;
-    color: #818078;
+    color: $dividerBackground;
   }
 }
