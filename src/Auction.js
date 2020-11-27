@@ -11,6 +11,17 @@ export default class Auction {
   }
 
   /**
+   * Get username by uid
+   * @param {string} userId Firebase Authentification uid
+   */
+  async getUsername(userId) {
+    const userRef = await firestore.collection("user").doc(userId).get();
+    const userData = userRef.data();
+    const username = userData.username;
+    return username;
+  }
+
+  /**
    * Get an list of all offers create by an specific user
    * @param {string} uid Firebase Authentification uid
    */
@@ -263,6 +274,25 @@ export default class Auction {
             rej(response);
           }
         });
+    });
+  }
+
+  /**
+   * Retrieve an Firestore document using his id
+   * @param {string} offerId Document id
+   */
+  getOffer(offerId) {
+    return new Promise((res, rej) => {
+      firestore
+        .collection("offers")
+        .doc(offerId)
+        .get()
+        .then((snapshot) => {
+          const offer = snapshot.data();
+          offer.id = offerId;
+          res(offer);
+        })
+        .catch((err) => rej(err));
     });
   }
 }

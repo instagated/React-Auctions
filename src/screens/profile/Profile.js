@@ -52,37 +52,37 @@ class SellHistory extends Component {
   }
 
   componentDidMount() {
-    // TODO Get sold offers from firebase
-    let temp = [];
+    const currentUser = Firebase.auth().currentUser,
+      userId = currentUser.uid;
+    let offerList = [];
 
-    // Check if the user is signed in via Firebase
-    Firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        let userId = user.uid;
-        firestore
-          .collection("user")
-          .doc(userId)
-          .onSnapshot((snapshot) => {
-            let doc = snapshot.data(),
-              offers = doc.offers;
+    if (currentUser) {
+      firestore
+        .collection("user")
+        .doc(userId)
+        .onSnapshot((snapshot) => {
+          const doc = snapshot.data(),
+            offers = doc.offers;
 
+          if (offers.length > 1) {
             offers.forEach((offerId) => {
-              firestore
-                .collection("offers")
-                .doc(offerId)
-                .get()
-                .then((doc) => {
-                  let offer = doc.data();
-                  offer.id = offerId;
-                  temp.push(offer);
+              new Auction()
+                .getOffer(offerId)
+                .then((offerData) => {
+                  if (offerData.bought !== undefined) {
+                    new Auction()
+                      .getUsername(offerData.bought.uid)
+                      .then((username) => (offerData.bought.username = username));
+                  }
+                  offerList.push(offerData);
                 })
-                .then(() => {
-                  this.setState({ offers: temp, loading: false });
-                });
+                .then(() => this.setState({ offers: offerList, loading: false }));
             });
-          });
-      }
-    });
+          } else {
+            this.setState({ offers: offerList, loading: false });
+          }
+        });
+    }
   }
 
   render() {
@@ -106,11 +106,18 @@ class SellHistory extends Component {
             <tbody>
               {offers.length > 0 ? (
                 offers.map((offer, index) => {
+                  const now = Date.now() / 1000, // We're using timestamp in seconds
+                    expireDiff = offer.expiresAt.seconds - now;
                   return (
                     <tr key={index} className="text-center">
                       <td>
-                        {/* FIXME We wanna check if the offer is aktuell, abgelaufen, verkauft */}
-                        <Badge variant="warning">Aktuell</Badge>
+                        {offer.bought === undefined && expireDiff > 0 ? (
+                          <Badge variant="warning">Aktuell</Badge>
+                        ) : offer.bought !== undefined ? (
+                          <Badge variant="success">Verkauft</Badge>
+                        ) : (
+                          <Badge variant="danger">Abgelaufen</Badge>
+                        )}
                       </td>
                       <td>
                         <Badge variant="success">
@@ -131,9 +138,16 @@ class SellHistory extends Component {
                         </p>
                       </td>
                       <td>
-                        <p className="font-weight-bold mb-0">
-                          {offer.sold !== undefined ? offer.sold.username : "Kein Käufer"}
-                        </p>
+                        {offer.bought !== undefined ? (
+                          <OverlayTrigger
+                            placement={"top"}
+                            overlay={<Tooltip>PlayerId: {offer.bought.pid}</Tooltip>}
+                          >
+                            <p className="font-weight-bold mb-0">{offer.bought.username}</p>
+                          </OverlayTrigger>
+                        ) : (
+                          <p className="font-weight-bold mb-0">Kein Käufer</p>
+                        )}
                       </td>
                     </tr>
                   );
