@@ -97,7 +97,7 @@ export default class App extends Component {
   }
 
   render() {
-    let { authentificated, user, verified, cash, bank, links } = this.state;
+    let { user, verified, links } = this.state;
     return (
       <Router>
         <div className="App">

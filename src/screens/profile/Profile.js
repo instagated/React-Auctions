@@ -138,31 +138,28 @@ class SellHistory extends Component {
 
   componentDidMount() {
     const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid;
-    let offerList = [];
+      userId = currentUser.uid,
+      offerList = [];
 
     if (currentUser) {
+      const sellerRef = firestore.collection("user").doc(userId);
       firestore
-        .collection("user")
-        .doc(userId)
+        .collection("offers")
+        .where("seller", "==", sellerRef)
         .onSnapshot((snapshot) => {
-          const doc = snapshot.data(),
-            offers = doc.offers;
+          const docList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
 
-          if (offers.length > 1) {
-            offers.forEach((offerId) => {
-              new Auction()
-                .getOffer(offerId)
-                .then((offerData) => {
-                  if (offerData.bought !== undefined) {
-                    new Auction()
-                      .getUsername(offerData.bought.uid)
-                      .then((username) => (offerData.bought.username = username));
-                  }
-                  offerList.push(offerData);
-                })
-                .then(() => this.setState({ offers: offerList, loading: false }));
+          if (docList.length > 0) {
+            docList.forEach((document) => {
+              const offer = document.data();
+              if (offer.bought !== undefined) {
+                new Auction()
+                  .getUsername(offer.bought.uid)
+                  .then((username) => (offer.bought.username = username));
+              }
+              offerList.push(offer);
             });
+            this.setState({ offers: offerList, loading: false });
           } else {
             this.setState({ offers: offerList, loading: false });
           }
@@ -274,26 +271,31 @@ class Offers extends Component {
         const doc = snapshot.data(),
           offers = doc.offers.reverse(); // We gonna reverse the array so have them sorted by the newest offer
 
-        offers.forEach((offerId) => {
-          firestore
-            .collection("offers")
-            .doc(offerId)
-            .get()
-            .then((doc) => {
-              const offer = doc.data(),
-                now = Date.now() / 1000;
-              if (
-                offer.expiresAt.seconds > now &&
-                !ids.includes(offerId) &&
-                offer.bought === undefined
-              ) {
-                offer.id = offerId;
-                ids.push(offerId);
-                offerList.push(offer);
-              }
-            })
-            .then(() => this.setState({ offers: offerList, loading: false }));
-        });
+        if (offers.length > 0) {
+          offers.forEach((offerId) => {
+            firestore
+              .collection("offers")
+              .doc(offerId)
+              .get()
+              .then((doc) => {
+                const offer = doc.data(),
+                  now = Date.now() / 1000;
+                if (
+                  offer.expiresAt.seconds > now &&
+                  !ids.includes(offerId) &&
+                  offer.bought === undefined
+                ) {
+                  offer.id = offerId;
+                  ids.push(offerId);
+                  offerList.push(offer);
+                }
+              })
+              .then(() => this.setState({ offers: offerList, loading: false }));
+          });
+        } else {
+          // No offers found
+          this.setState({ offers: offerList, loading: false });
+        }
       });
   }
 
@@ -325,7 +327,7 @@ class Offers extends Component {
               );
             })
           ) : (
-            <div className="bg-light mx-auto px-4 py-3 rounded">
+            <div className="bg-light mx-auto px-4 py-3 rounded w-100">
               <h3 className="font-weight-bold text-center mb-0">Keine Angebote gefunden</h3>
             </div>
           )}

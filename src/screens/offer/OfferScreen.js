@@ -12,7 +12,6 @@ import { DeleteOffer } from "../../components/Modals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
 import { Redirect } from "react-router-dom";
-import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
 
 export default class OfferScreen extends Component {
   constructor() {
