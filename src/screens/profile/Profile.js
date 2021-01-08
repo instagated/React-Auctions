@@ -443,7 +443,7 @@ class Profile extends Component {
                     <img id="avatar" className="mb-3" alt="Profilbild" src={avatar} />
                     <form onSubmit={this.handleProfileSubmit}>
                       <p className="font-weight-bold text-center">
-                        @{user.username}
+                        @{user.displayName}
                         <a className="text-success ml-2" onClick={() => this.toggleProfileState()}>
                           <FontAwesomeIcon icon={faPencilAlt} className="icon" />
                         </a>

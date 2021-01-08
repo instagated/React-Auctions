@@ -28,6 +28,10 @@ class SignUp extends Component {
       .then(() => {
         const user = Firebase.auth().currentUser,
           userId = user.uid;
+        user.updateProfile({
+          displayName: username.value,
+        });
+        // FIXME Remove this part. We don't need it later
         firestore.collection("user").doc(userId).set({
           username: username.value,
           bought: [],
