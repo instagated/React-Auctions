@@ -153,25 +153,29 @@ export default class Auction {
   uploadProductImages(offer, productImages) {
     return new Promise((res, rej) => {
       var images = [];
-      for (let i = 0; i < productImages.length; i++) {
-        const image = productImages[i];
-        const imageRef = Firebase.storage().ref(`offers/${offer}/product/${image.name}`);
-        const task = imageRef.put(image);
-        task.on(
-          "state_changed",
-          function progress(snapshot) {
-            // Do something...
-          },
-          function error(error) {
-            rej(error);
-          },
-          function complete(event) {
-            imageRef.getDownloadURL().then((url) => {
-              images.push(url);
-              if (i === productImages.length - 1) res(images);
-            });
-          }
-        );
+      if (productImages.length > 0) {
+        for (let i = 0; i < productImages.length; i++) {
+          const image = productImages[i];
+          const imageRef = Firebase.storage().ref(`offers/${offer}/product/${image.name}`);
+          const task = imageRef.put(image);
+          task.on(
+            "state_changed",
+            function progress(snapshot) {
+              // Do something...
+            },
+            function error(error) {
+              rej(error);
+            },
+            function complete(event) {
+              imageRef.getDownloadURL().then((url) => {
+                images.push(url);
+                if (i === productImages.length - 1) res(images);
+              });
+            }
+          );
+        }
+      } else {
+        res(null);
       }
     });
   }
