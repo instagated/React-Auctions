@@ -191,11 +191,10 @@ class DeleteOffer extends Component {
       .then((result) => {
         console.log(result);
         this.toast.success("Das Angebot wurde gelöscht");
-        // TODO Redirect to the landingpage
       })
       .catch((err) => {
         console.error(err);
-        this.toast.error("Das Angebot konnte nicht gelöscht werden");
+        this.toast.error(err.message);
       });
     this.handleClose();
   };

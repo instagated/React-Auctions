@@ -112,17 +112,19 @@ export default class OfferScreen extends Component {
                       >
                         <img src={offer.images.thumbnail} alt="Vorschaubild" />
                       </a>
-                      {offer.images.product.map((image, index) => {
-                        return (
-                          <a
-                            className="image"
-                            onClick={() => this.setState({ thumbnail: image })}
-                            key={index}
-                          >
-                            <img src={image} alt="Produktbild" />
-                          </a>
-                        );
-                      })}
+                      {offer.images.product !== null
+                        ? offer.images.product.map((image, index) => {
+                            return (
+                              <a
+                                className="image"
+                                onClick={() => this.setState({ thumbnail: image })}
+                                key={index}
+                              >
+                                <img src={image} alt="Produktbild" />
+                              </a>
+                            );
+                          })
+                        : null}
                     </div>
                   </main>
                 </Col>
