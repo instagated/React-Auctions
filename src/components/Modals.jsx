@@ -1,14 +1,16 @@
 import React, { Component } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import { toast as toastConfig } from "../config.json";
 import ToastService from "react-material-toast";
 import Firebase, { firestore } from "../Firebase";
 import Auction from "../Auction";
+// Components
+import { Modal, Button, Form, Row, Col, Spinner } from "react-bootstrap";
 
 class CreateOffer extends Component {
   constructor(props) {
     super();
     this.state = {
+      loading: false,
       shown: props.shown,
     };
     this.toast = ToastService.new(toastConfig);
@@ -19,6 +21,7 @@ class CreateOffer extends Component {
   handleShow = () => this.setState({ shown: true });
 
   handleSubmit = (e) => {
+    this.setState({ loading: true });
     e.preventDefault();
 
     let {
@@ -41,23 +44,26 @@ class CreateOffer extends Component {
       expiresAt: new Date(`${expireDate.value} ${expireTime.value}`),
       createdAt: new Date(),
     };
-
     new Auction()
       .createOffer(newOffer, thumbnail.files[0], images.files)
       .then(() => {
         this.handleClose();
         this.toast.success(`Das Angebot ${newOffer.name} wurde erstellt`);
         this.formRef.reset();
+        this.setState({ loading: false });
       })
       .catch((err) => {
         console.error(err);
         this.handleClose();
         this.toast.error("Das Angebot konnte nicht erstellt werden");
         this.formRef.reset();
+        this.setState({ loading: false });
       });
   };
 
   render() {
+    const { loading } = this.state;
+
     return (
       <Modal show={this.state.shown} onHide={this.handleClose} backdrop="static" size="md" centered>
         <Modal.Header /*closeButton*/>
@@ -65,6 +71,9 @@ class CreateOffer extends Component {
         </Modal.Header>
         <Form onSubmit={this.handleSubmit} ref={(target) => (this.formRef = target)}>
           <Modal.Body className="pb-0">
+            <div className={loading ? "spinner-container" : "d-none"}>
+              <Spinner className="loader" animation="border" />
+            </div>
             <Form.Group controlId="exampleForm.ControlSelect1">
               <Form.Label>
                 <strong>Typ</strong>
@@ -141,7 +150,7 @@ class CreateOffer extends Component {
             <Button variant="white" className="px-3" onClick={this.handleClose}>
               Abbrechen
             </Button>
-            <Button variant="success" className="px-3" type="submit">
+            <Button variant="success" className="px-3" type="submit" disabled={loading}>
               Angebot erstellen
             </Button>
           </Modal.Footer>
