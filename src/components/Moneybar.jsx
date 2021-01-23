@@ -64,7 +64,7 @@ export default class Moneybar extends Component {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  {user !== undefined ? <Dropdown.Item>{user.username}</Dropdown.Item> : null}
+                  {user !== undefined ? <Dropdown.Item>{user.displayName}</Dropdown.Item> : null}
                   <Dropdown.Item href="../Profil/">
                     <FontAwesomeIcon icon={faUserCircle} className="icon" /> Mein Profil
                   </Dropdown.Item>

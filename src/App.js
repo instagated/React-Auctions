@@ -77,7 +77,6 @@ export default class App extends Component {
           .doc(userId)
           .get()
           .then((doc) => {
-            user.username = doc.data().username;
             apiKey !== null
               ? new ReallifeRPG().getPlayer(apiKey).then((playerData) => {
                   const data = playerData.data[0];
