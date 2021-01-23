@@ -37,34 +37,26 @@ class BuyHistory extends Component {
 
   componentDidMount() {
     const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid;
-    let offerList = [];
+      userId = currentUser.uid,
+      offerList = [];
 
     if (currentUser) {
+      const sellerRef = firestore.collection("user").doc(userId),
+        sellerUid = sellerRef.id; // Should be equal with userId/currentUser.uid
       firestore
-        .collection("user")
-        .doc(userId)
+        .collection("offers")
+        .where("bought.uid", "==", sellerUid)
         .onSnapshot((snapshot) => {
-          const doc = snapshot.data(),
-            offers = doc.bought;
-
-          if (offers.length > 1) {
-            offers.forEach((offerId) => {
-              new Auction()
-                .getOffer(offerId)
-                .then((offerData) => {
-                  if (offerData.bought !== undefined) {
-                    new Auction()
-                      .getUsername(offerData.bought.uid)
-                      .then((username) => (offerData.bought.username = username));
-                  }
-                  offerList.push(offerData);
-                })
-                .then(() => this.setState({ offers: offerList, loading: false }));
-            });
-          } else {
-            this.setState({ offers: offerList, loading: false });
-          }
+          const docList = snapshot.docs;
+          docList.forEach((document) => {
+            const offer = document.data();
+            new Auction()
+              .getUsername(offer.bought.uid)
+              .then((username) => (offer.bought.username = username));
+            offer.id = document.id;
+            offerList.push(offer);
+          });
+          this.setState({ offers: offerList, loading: false });
         });
     }
   }
@@ -152,6 +144,7 @@ class SellHistory extends Component {
           if (docList.length > 0) {
             docList.forEach((document) => {
               const offer = document.data();
+              offer.id = document.id;
               if (offer.bought !== undefined) {
                 new Auction()
                   .getUsername(offer.bought.uid)
@@ -259,41 +252,27 @@ class Offers extends Component {
 
   componentDidMount() {
     const offerList = [],
-      ids = [],
-      userId = Firebase.auth().currentUser.uid;
-
+      userId = Firebase.auth().currentUser.uid,
+      sellerRef = firestore.collection("user").doc(userId);
     // We don't need to check if the user is signed in because the parent component will check if the
     // current authentification-state and redirect any user which isn't signed in to the sign-in screen
     firestore
-      .collection("user")
-      .doc(userId)
+      .collection("offers")
+      .where("seller", "==", sellerRef)
       .onSnapshot((snapshot) => {
-        const doc = snapshot.data(),
-          offers = doc.offers.reverse(); // We gonna reverse the array so have them sorted by the newest offer
+        const docList = snapshot.docs.reverse(); // reverse the array so we got them sort by date
 
-        if (offers.length > 0) {
-          offers.forEach((offerId) => {
-            firestore
-              .collection("offers")
-              .doc(offerId)
-              .get()
-              .then((doc) => {
-                const offer = doc.data(),
-                  now = Date.now() / 1000;
-                if (
-                  offer.expiresAt.seconds > now &&
-                  !ids.includes(offerId) &&
-                  offer.bought === undefined
-                ) {
-                  offer.id = offerId;
-                  ids.push(offerId);
-                  offerList.push(offer);
-                }
-              })
-              .then(() => this.setState({ offers: offerList, loading: false }));
+        if (docList.length > 0) {
+          docList.forEach((document) => {
+            const offerData = document.data(),
+              now = Date.now() / 1000;
+            if (offerData.bought === undefined && offerData.expiresAt.seconds > now) {
+              offerData.id = document.id;
+              offerList.push(offerData);
+            }
           });
+          this.setState({ offers: offerList, loading: false });
         } else {
-          // No offers found
           this.setState({ offers: offerList, loading: false });
         }
       });
@@ -481,6 +460,7 @@ class Profile extends Component {
                         <Form.Control
                           type="text"
                           name="password"
+                          readOnly={!editProfile}
                           placeholder="Passwort unsichtbar"
                           onChange={(e) => this.setState({ password: e.target.value })}
                         />
@@ -491,6 +471,7 @@ class Profile extends Component {
                         <Form.Control
                           type="text"
                           name="apiKey"
+                          readOnly={!editProfile}
                           value={apiKey}
                           onChange={(e) => this.setState({ apiKey: e.target.value })}
                         />
