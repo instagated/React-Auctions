@@ -24,6 +24,37 @@ export default class OfferScreen extends Component {
     this.toast = ToastServive.new(toastConfig);
   }
 
+  _renderProductImage = (image) => {
+    return (
+      <a className="image" onClick={() => this.setState({ thumbnail: image })} key={image}>
+        <img src={image} alt="Produktbild" />
+      </a>
+    );
+  };
+  buy(offer, user) {
+    new ReallifeRPG().getPlayer(localStorage.getItem("@dag_apiKey")).then((player) => {
+      const playerData = player.data[0],
+        pid = playerData.pid,
+        cash = parseInt(playerData.cash),
+        bank = parseInt(playerData.bankacc),
+        total = cash + bank;
+
+      if (this.checkBalance(offer.price, total)) {
+        new Auction()
+          .buy(user.uid, pid, offer.id)
+          .then((res) => {
+            this.toast.success(`Du hast den Artikel ${offer.name} gekauft`);
+          })
+          .catch((err) => {
+            console.error("[Auctions]", err);
+            this.toast.error("Etwas ist schief gelaufen");
+          });
+      } else {
+        this.toast.error("Du hast nicht ausreichend Geld für dieses Angebot");
+      }
+    });
+  }
+
   checkBalance(requiredBalance, totalBalance) {
     return totalBalance >= requiredBalance;
   }
@@ -105,23 +136,10 @@ export default class OfferScreen extends Component {
                       <img className="thumbnail" src={thumbnail} alt="Vorschaubild" />
                     </div>
                     <div className="image-container mb-3">
-                      <a
-                        className="image"
-                        onClick={() => this.setState({ thumbnail: offer.images.thumbnail })}
-                      >
-                        <img src={offer.images.thumbnail} alt="Vorschaubild" />
-                      </a>
+                      {this._renderProductImage(offer.images.thumbnail)}
                       {offer.images.product !== null
-                        ? offer.images.product.map((image, index) => {
-                            return (
-                              <a
-                                className="image"
-                                onClick={() => this.setState({ thumbnail: image })}
-                                key={index}
-                              >
-                                <img src={image} alt="Produktbild" />
-                              </a>
-                            );
+                        ? offer.images.product.map((image) => {
+                            return this._renderProductImage(image);
                           })
                         : null}
                     </div>
@@ -218,33 +236,7 @@ export default class OfferScreen extends Component {
                             className="w-100"
                             variant="success"
                             onClick={() => {
-                              new ReallifeRPG()
-                                .getPlayer(localStorage.getItem("@dag_apiKey"))
-                                .then((player) => {
-                                  const playerData = player.data[0],
-                                    pid = playerData.pid,
-                                    cash = parseInt(playerData.cash),
-                                    bank = parseInt(playerData.bankacc),
-                                    total = cash + bank;
-
-                                  if (this.checkBalance(offer.price, total)) {
-                                    new Auction()
-                                      .buy(user.uid, pid, offer.id)
-                                      .then((res) => {
-                                        this.toast.success(
-                                          `Du hast den Artikel ${offer.name} gekauft`
-                                        );
-                                      })
-                                      .catch((err) => {
-                                        console.error("[Auctions]", err);
-                                        this.toast.error("Etwas ist schief gelaufen");
-                                      });
-                                  } else {
-                                    this.toast.error(
-                                      "Du hast nicht ausreichend Geld für dieses Angebot"
-                                    );
-                                  }
-                                });
+                              this.buy(offer, user);
                             }}
                           >
                             Kaufen
