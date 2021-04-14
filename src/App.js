@@ -35,8 +35,8 @@ export default class App extends Component {
         },
         {
           active: false,
-          name: "EFT Markt",
-          target: "https://eft.dulliag.de/",
+          name: "URL kürzen",
+          target: "https://url.dulliag.de/",
         },
         {
           active: false,
