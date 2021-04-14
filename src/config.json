@@ -13,5 +13,10 @@
     "place": "bottomRight",
     "duration": 2,
     "maxCount": 8
+  },
+  "avatar": {
+    "size": 256,
+    "background": "fff",
+    "color": "212529"
   }
 }

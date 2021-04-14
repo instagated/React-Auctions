@@ -26,6 +26,7 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
 import Auction from "../../Auction";
+import { User } from "../../ApiHandler";
 
 class BuyHistory extends Component {
   constructor() {
@@ -62,7 +63,7 @@ class BuyHistory extends Component {
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -161,7 +162,7 @@ class SellHistory extends Component {
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -279,7 +280,7 @@ class Offers extends Component {
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -406,20 +407,21 @@ class Profile extends Component {
   }
 
   render() {
-    let { loading, authentificated } = this.state;
-    let { editProfile, avatar, user, email, apiKey, offerModal } = this.state;
+    const { loading, authentificated } = this.state;
+    const { editProfile, user, email, apiKey, offerModal } = this.state;
 
     if (loading) {
       return null;
     } else {
       if (authentificated) {
+        const avatarUrl = new User().getAvatar(user.displayName);
         return (
           <section>
             <div>
               <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                 <Col id="profile-container" className="px-0 px-md-3" xs={12} md={4} lg={4}>
                   <div className="bg-light w-100 p-4 rounded">
-                    <img id="avatar" className="mb-3" alt="Profilbild" src={avatar} />
+                    <img id="avatar" className="mb-3" alt="Profilbild" src={avatarUrl} />
                     <form onSubmit={this.handleProfileSubmit}>
                       <p className="font-weight-bold text-center">
                         @{user.displayName}

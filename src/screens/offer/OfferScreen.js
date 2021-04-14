@@ -12,6 +12,7 @@ import { DeleteOffer } from "../../components/Modals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
 import { Redirect } from "react-router-dom";
+import { User } from "../../ApiHandler";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -31,6 +32,7 @@ export default class OfferScreen extends Component {
       </a>
     );
   };
+
   buy(offer, user) {
     new ReallifeRPG().getPlayer(localStorage.getItem("@dag_apiKey")).then((player) => {
       const playerData = player.data[0],
@@ -108,7 +110,7 @@ export default class OfferScreen extends Component {
   }
 
   render() {
-    let {
+    const {
       loading,
       found,
       authentificated,
@@ -126,6 +128,7 @@ export default class OfferScreen extends Component {
     } else {
       // FIXME Get the avatar from the instead of using the DulliAG logo
       if (found) {
+        const avatarUrl = new User().getAvatar(seller.data().username);
         return (
           <section className="offer">
             <div>
@@ -152,7 +155,7 @@ export default class OfferScreen extends Component {
                         <img
                           style={{ width: "2.5rem", height: "auto", marginRight: 3 }}
                           className="rounded-circle shadow-md"
-                          src={"https://files.dulliag.de/web/images/logo.jpg"}
+                          src={avatarUrl}
                           alt="Profilbild"
                         />{" "}
                         {seller.data().username}

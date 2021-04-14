@@ -12,8 +12,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../style/moneybar.scss";
+import { User } from "../ApiHandler";
 
 // TODO Performance needs to be improved by a lot
+// FIXME Remove the ReallifeRPG API requests
 export default class Moneybar extends Component {
   constructor() {
     super();
@@ -32,13 +34,14 @@ export default class Moneybar extends Component {
   }
 
   render() {
-    const { loading, player } = this.state,
-      { user } = this.props;
+    const { loading, player } = this.state;
+    const { user } = this.props;
 
     if (loading) {
       return null;
     } else {
       if (user) {
+        const avatarUrl = new User().getAvatar(user.displayName);
         return (
           <div className="moneybar">
             <div className="row align-items-center">
@@ -60,7 +63,7 @@ export default class Moneybar extends Component {
               </OverlayTrigger>
               <Dropdown>
                 <Dropdown.Toggle variant="success">
-                  <img src={player.data[0].avatar_full} alt="Profilbild" />
+                  <img src={avatarUrl} alt="Profilbild" />
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
