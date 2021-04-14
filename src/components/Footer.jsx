@@ -38,21 +38,14 @@ export default class Footer extends Component {
 
             <div className="link-container col-md-2 col-6 mb-3 mb-md-0 pl-0 pl-md-3">
               <h5 className="mb-1 text-success">Sponsoren</h5>
-              <ul className="list-unstyled text-small">
-                <li>
-                  <a href="https://pentoxi.de/">Pentoxi</a>
-                </li>
-              </ul>
+              <ul className="list-unstyled text-small"></ul>
             </div>
 
             <div className="link-container col-md-2 col-6 mb-3 mb-md-0 pr-0 pr-md-3">
               <h5 className="mb-1 text-success">Administration</h5>
               <ul className="list-unstyled text-small">
                 <li>
-                  <a href="https://info.dulliag.de">Login</a>
-                </li>
-                <li>
-                  <a href="https://info.dulliag.de/Dashboard/">Tool</a>
+                  <a href="https://info.dulliag.de/">Infopanel</a>
                 </li>
               </ul>
             </div>
@@ -71,8 +64,8 @@ export default class Footer extends Component {
 
         <div className="credits">
           <p className="text text-center py-4 mb-0">
-            © {new Date().getFullYear()} Auction v{version} by{" "}
-            <a href="https://me.dulliag.de" className="text-link">
+            © {new Date().getFullYear()} Auktionshaus v{version} by{" "}
+            <a href="https://thorben.dulliag.de" className="text-link">
               Thorben Klein
             </a>
           </p>
