@@ -24,9 +24,6 @@
 
   a {
     font-weight: bold;
-    &:last-of-type {
-      color: $primary;
-    }
     &:hover {
       text-decoration: none;
     }
@@ -70,10 +67,6 @@
         }
         &:first-child {
           text-align: center;
-          color: $primary;
-        }
-        &:last-child {
-          color: $danger;
         }
       }
     }
