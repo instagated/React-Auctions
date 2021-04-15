@@ -1,5 +1,27 @@
 <h1 align="center">Changelogs</h1>
 
+## :bookmark: [React-Auctions v1.0.0](https://github.com/tklein1801/React-Auctions/releases/tag/v1.0.0)
+
+#### TODO
+
+- **Gebote** wurden wieder eingefügt
+- **ReallifeRPG** integration entfernen
+- **Countdown** wird nun auch nach einem Update des Dokumentes richtig angezeigt
+
+#### Hinzugefügt
+
+- **Hamburger** wird im nun auf Tablets angezeigt
+
+#### Überarbeitet
+
+- **Navbar Links** wurden erneuert
+- **Footer** überarbeitet
+- **eu.ui-avatars.eu** anstelle der **Steam Profilbilder** verwenden
+
+#### Entfernt
+
+---
+
 ## :bookmark: [React-Auctions v0.4.2](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.2)
 
 #### Hinzugefügt
