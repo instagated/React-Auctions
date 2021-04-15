@@ -1,22 +1,11 @@
 import React, { Component, createRef } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import ReallifeRPG from "../../ReallifeRPG";
+import { User } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
 // Components
 import { Link, Redirect } from "react-router-dom";
-import {
-  Col,
-  Form,
-  ButtonGroup,
-  Button,
-  Nav,
-  Tab,
-  Table,
-  Badge,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
 import Loader from "../../components/Loader";
 import { Offer } from "../../components/Card";
 import { CreateOffer } from "../../components/Modals";
@@ -25,8 +14,6 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
-import Auction from "../../Auction";
-import { User } from "../../ApiHandler";
 
 class BuyHistory extends Component {
   constructor() {
@@ -37,21 +24,20 @@ class BuyHistory extends Component {
   }
 
   componentDidMount() {
-    const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid,
-      offerList = [];
-
-    if (currentUser) {
-      const sellerRef = firestore.collection("user").doc(userId),
-        sellerUid = sellerRef.id; // Should be equal with userId/currentUser.uid
+    const user = Firebase.auth().currentUser;
+    var offerList = [];
+    if (user) {
+      const userId = user.uid;
+      const sellerRef = firestore.collection("user").doc(userId);
+      const sellerId = sellerRef.id; // Should be equal with userId/currentUser.uid
       firestore
         .collection("offers")
-        .where("bought.uid", "==", sellerUid)
+        .where("bought.uid", "==", sellerId)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs;
-          docList.forEach((document) => {
+          const documentList = snapshot.docs;
+          documentList.forEach((document) => {
             const offer = document.data();
-            new Auction()
+            new User()
               .getUsername(offer.bought.uid)
               .then((username) => (offer.bought.username = username));
             offer.id = document.id;
@@ -84,7 +70,7 @@ class BuyHistory extends Component {
                 offers.map((offer, index) => {
                   return (
                     <tr key={index} className="text-center">
-                      <td>{offer.type === 2 ? <Badge variant="success">Gekauft</Badge> : null}</td>
+                      <td>{offer.type === 2 && <Badge variant="success">Gekauft</Badge>}</td>
                       <td>
                         <Badge variant="success">
                           {offer.type === 1 ? "Auktion" : "Sofortkauf"}
@@ -130,33 +116,27 @@ class SellHistory extends Component {
   }
 
   componentDidMount() {
-    const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid,
-      offerList = [];
-
-    if (currentUser) {
+    const user = Firebase.auth().currentUser;
+    var offerList = [];
+    if (user) {
+      const userId = user.uid;
       const sellerRef = firestore.collection("user").doc(userId);
       firestore
         .collection("offers")
         .where("seller", "==", sellerRef)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
-
-          if (docList.length > 0) {
-            docList.forEach((document) => {
-              const offer = document.data();
-              offer.id = document.id;
-              if (offer.bought !== undefined) {
-                new Auction()
-                  .getUsername(offer.bought.uid)
-                  .then((username) => (offer.bought.username = username));
-              }
-              offerList.push(offer);
-            });
-            this.setState({ offers: offerList, loading: false });
-          } else {
-            this.setState({ offers: offerList, loading: false });
-          }
+          const documentList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
+          documentList.forEach((document) => {
+            const offer = document.data();
+            offer.id = document.id;
+            if (offer.bought !== undefined) {
+              new User()
+                .getUsername(offer.bought.uid)
+                .then((username) => (offer.bought.username = username));
+            }
+            offerList.push(offer);
+          });
+          this.setState({ offers: offerList, loading: false });
         });
     }
   }
@@ -182,8 +162,8 @@ class SellHistory extends Component {
             <tbody>
               {offers.length > 0 ? (
                 offers.map((offer, index) => {
-                  const now = Date.now() / 1000, // We're using timestamp in seconds
-                    expireDiff = offer.expiresAt.seconds - now;
+                  const now = Date.now() / 1000; // We're using timestamp in seconds
+                  const expireDiff = offer.expiresAt.seconds - now;
                   return (
                     <tr key={index} className="text-center">
                       <td>
@@ -215,12 +195,7 @@ class SellHistory extends Component {
                       </td>
                       <td>
                         {offer.bought !== undefined ? (
-                          <OverlayTrigger
-                            placement={"top"}
-                            overlay={<Tooltip>PlayerId: {offer.bought.pid}</Tooltip>}
-                          >
-                            <p className="font-weight-bold mb-0">{offer.bought.username}</p>
-                          </OverlayTrigger>
+                          <p className="font-weight-bold mb-0">{offer.bought.username}</p>
                         ) : (
                           <p className="font-weight-bold mb-0">Kein Käufer</p>
                         )}
@@ -252,31 +227,28 @@ class Offers extends Component {
   }
 
   componentDidMount() {
-    const offerList = [],
-      userId = Firebase.auth().currentUser.uid,
-      sellerRef = firestore.collection("user").doc(userId);
-    // We don't need to check if the user is signed in because the parent component will check if the
-    // current authentification-state and redirect any user which isn't signed in to the sign-in screen
-    firestore
-      .collection("offers")
-      .where("seller", "==", sellerRef)
-      .onSnapshot((snapshot) => {
-        const docList = snapshot.docs.reverse(); // reverse the array so we got them sort by date
+    const user = Firebase.auth().currentUser;
+    var offerList = [];
+    if (user) {
+      const userId = user.uid;
+      const sellerRef = firestore.collection("user").doc(userId);
 
-        if (docList.length > 0) {
-          docList.forEach((document) => {
-            const offerData = document.data(),
-              now = Date.now() / 1000;
+      firestore
+        .collection("offers")
+        .where("seller", "==", sellerRef)
+        .onSnapshot((snapshot) => {
+          const documentList = snapshot.docs.reverse(); // reverse the array so we got them sort by date
+          const now = Date.now() / 1000; // Timestamp in seconds
+          documentList.forEach((document) => {
+            const offerData = document.data();
             if (offerData.bought === undefined && offerData.expiresAt.seconds > now) {
               offerData.id = document.id;
               offerList.push(offerData);
             }
           });
           this.setState({ offers: offerList, loading: false });
-        } else {
-          this.setState({ offers: offerList, loading: false });
-        }
-      });
+        });
+    }
   }
 
   render() {
@@ -337,19 +309,16 @@ class Profile extends Component {
   handleProfileSubmit = (e) => {
     e.preventDefault();
     const { user } = this.state;
-    const { email, password, apiKey } = e.target.elements,
-      authentificatedUser = Firebase.auth().currentUser;
-    console.log(email.value, password.value, apiKey.value);
+    const { email, password } = e.target.elements;
+    const authentificatedUser = Firebase.auth().currentUser;
 
     let updateEmail =
         email.value !== user.email ? authentificatedUser.updateEmail(email.value) : null,
       updatePassword =
-        password.value !== "" ? authentificatedUser.updatePassword(password.value) : null,
-      updateKey =
-        apiKey.value !== user.apiKey ? localStorage.setItem("@dag_apiKey", apiKey.value) : null;
+        password.value !== "" ? authentificatedUser.updatePassword(password.value) : null;
 
     this.toggleProfileState();
-    Promise.all([updateEmail, updatePassword, updateKey])
+    Promise.all([updateEmail, updatePassword])
       .then(() => {
         this.toast.success("Die Änderungen wurden gespeichert");
       })
@@ -357,16 +326,18 @@ class Profile extends Component {
         console.error(err);
         switch (err.code) {
           case "auth/requires-recent-login":
-            const user = Firebase.auth().currentUser,
-              alreadyVerified = user.emailVerified;
+            const user = Firebase.auth().currentUser;
+            const alreadyVerified = user.emailVerified;
             // We're gonna check if the email is already verified bcause if he is he only need to relog
-            alreadyVerified
-              ? this.toast.info(
-                  "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
-                )
-              : this.toast.error(
-                  "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
-                );
+            if (alreadyVerified) {
+              this.toast.info(
+                "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
+              );
+            } else {
+              this.toast.error(
+                "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
+              );
+            }
             break;
           default:
             this.toast.error("Die Änderungen konnten nicht gespeichert werden");
@@ -386,18 +357,11 @@ class Profile extends Component {
           .get()
           .then((doc) => {
             user.username = doc.data().username;
-            user.apiKey = localStorage.getItem("@dag_apiKey");
-            const avatar = new ReallifeRPG().getPlayer(user.apiKey);
-            avatar.then((response) => {
-              const avatar_full = response.data[0].avatar_full;
-              this.setState({
-                authentificated: true,
-                loading: false,
-                avatar: avatar_full,
-                user: user,
-                email: user.email,
-                apiKey: localStorage.getItem("@dag_apiKey"),
-              });
+            this.setState({
+              authentificated: true,
+              loading: false,
+              user: user,
+              email: user.email,
             });
           });
       } else {
@@ -408,7 +372,7 @@ class Profile extends Component {
 
   render() {
     const { loading, authentificated } = this.state;
-    const { editProfile, user, email, apiKey, offerModal } = this.state;
+    const { editProfile, user, email, offerModal } = this.state;
 
     if (loading) {
       return null;
@@ -419,7 +383,13 @@ class Profile extends Component {
           <section>
             <div>
               <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                <Col id="profile-container" className="px-0 px-md-3" xs={12} md={4} lg={4}>
+                <Col
+                  id="profile-container"
+                  className="px-0 px-md-3 mb-3 mb-md-0"
+                  xs={12}
+                  md={4}
+                  lg={4}
+                >
                   <div className="bg-light w-100 p-4 rounded">
                     <img id="avatar" className="mb-3" alt="Profilbild" src={avatarUrl} />
                     <form onSubmit={this.handleProfileSubmit}>
@@ -467,20 +437,10 @@ class Profile extends Component {
                           onChange={(e) => this.setState({ password: e.target.value })}
                         />
                       </Form.Group>
-
-                      <Form.Group className="mb-0">
-                        <Form.Label className="font-weight-bold">API-Key</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="apiKey"
-                          readOnly={!editProfile}
-                          value={apiKey}
-                          onChange={(e) => this.setState({ apiKey: e.target.value })}
-                        />
-                      </Form.Group>
                     </form>
                   </div>
                 </Col>
+
                 <Col id="profile-content" className="px-0 px-md-3" xs={12} md={8} lg={8}>
                   <Tab.Container defaultActiveKey="offers">
                     <div className="w-100 p-4 bg-light rounded mb-3">

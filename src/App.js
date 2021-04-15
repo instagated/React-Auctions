@@ -66,37 +66,34 @@ export default class App extends Component {
   componentDidMount() {
     // Check if the user is authentificated
     Firebase.auth().onAuthStateChanged((user) => {
-      const verified = user.emailVerified, // True if the user has already verified his email
-        apiKey = localStorage.getItem("@dag_apiKey");
+      const verified = user.emailVerified; // True if the user has already verified his email
+      const apiKey = localStorage.getItem("@dag_apiKey");
       let authentificated = false; // Bcause the user is signed in
       if (user) {
         authentificated = true;
         const userId = user.uid;
+        // FIXME If we remove this part of code the username of the buy-history won't work
+        // Why? How can I fix this?
         firestore
           .collection("user")
           .doc(userId)
           .get()
-          .then((doc) => {
-            apiKey !== null
-              ? new ReallifeRPG().getPlayer(apiKey).then((playerData) => {
-                  const data = playerData.data[0];
-                  this.setState({
-                    user: user,
-                    authentificated: authentificated,
-                    verified: verified,
-                    cash: data.cash,
-                    bank: data.bankacc,
-                    pid: data.pid,
-                  });
-                })
-              : this.keyModalRef.handleShow();
+          .finally(() => {
+            apiKey !== null &&
+              new ReallifeRPG().getPlayer(apiKey).then(() => {
+                this.setState({
+                  user: user,
+                  authentificated: authentificated,
+                  verified: verified,
+                });
+              });
           });
       }
     });
   }
 
   render() {
-    let { user, verified, links } = this.state;
+    const { user, verified, links } = this.state;
     return (
       <Router>
         <div className="App">

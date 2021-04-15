@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Firebase, { firestore } from "../../Firebase";
+import { Offer, User } from "../../ApiHandler";
 import Auction from "../../Auction";
-import ReallifeRPG from "../../ReallifeRPG";
 import { toast as toastConfig } from "../../config.json";
 import ToastServive from "react-material-toast";
 // Components
@@ -12,7 +12,6 @@ import { DeleteOffer } from "../../components/Modals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
 import { Redirect } from "react-router-dom";
-import { User } from "../../ApiHandler";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -33,42 +32,43 @@ export default class OfferScreen extends Component {
     );
   };
 
-  buy(offer, user) {
-    new ReallifeRPG().getPlayer(localStorage.getItem("@dag_apiKey")).then((player) => {
-      const playerData = player.data[0],
-        pid = playerData.pid,
-        cash = parseInt(playerData.cash),
-        bank = parseInt(playerData.bankacc),
-        total = cash + bank;
-
-      if (this.checkBalance(offer.price, total)) {
-        new Auction()
-          .buy(user.uid, pid, offer.id)
-          .then((res) => {
-            this.toast.success(`Du hast den Artikel ${offer.name} gekauft`);
-          })
-          .catch((err) => {
-            console.error("[Auctions]", err);
-            this.toast.error("Etwas ist schief gelaufen");
-          });
-      } else {
-        this.toast.error("Du hast nicht ausreichend Geld für dieses Angebot");
-      }
-    });
+  // TODO Check if this function works
+  /**
+   * Handle the buy-button click
+   * @param {object} offer
+   * @param {object} user
+   */
+  handleBuy(offer, user) {
+    new Offer()
+      .buy(offer, user)
+      .then((result) => {
+        console.log(result);
+        this.toast.success(`Du hast den Artikel ${offer.name} gekauft`);
+      })
+      .catch((err) => {
+        console.error("ERROR:", err);
+        this.toast.error("Der Artikel konnte nicht gekauft werden");
+      });
   }
 
-  checkBalance(requiredBalance, totalBalance) {
-    return totalBalance >= requiredBalance;
-  }
+  /**
+   * Handle the bid-button click
+   * @param {object} offer
+   * @param {object} user
+   * @param {number} bid
+   */
+  handleBid(offer, user, bid) {}
 
   componentDidMount() {
     const { offerId } = this.state;
 
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
-      user
-        ? this.setState({ authentificated: true, user: user })
-        : this.setState({ authentificated: false });
+      if (user) {
+        this.setState({ authentificated: true, user: user });
+      } else {
+        this.setState({ authentificated: false });
+      }
     });
 
     // Get real-time document changes & update the state
@@ -77,21 +77,26 @@ export default class OfferScreen extends Component {
       .doc(offerId)
       .onSnapshot((doc) => {
         if (doc.exists) {
-          let offer = doc.data();
+          const offer = doc.data();
           offer.id = offerId;
 
-          offer.bought === undefined
-            ? this.setState({
-                countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-              })
-            : this.setState({ countdown: "Das Angebot wurde verkauft" });
+          // FIXME After an document update the countdown doesn't work properly
+          if (offer.bought === undefined) {
+            this.setState({
+              countdown: new Auction().createCountdown(offer.expiresAt.seconds),
+            });
+          } else {
+            this.setState({ countdown: "Das Angebot wurde verkauft" });
+          }
 
           setInterval(() => {
-            offer.bought === undefined
-              ? this.setState({
-                  countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-                })
-              : this.setState({ countdown: "Das Angebot wurde verkauft" });
+            if (offer.bought === undefined) {
+              this.setState({
+                countdown: new Auction().createCountdown(offer.expiresAt.seconds),
+              });
+            } else {
+              this.setState({ countdown: "Das Angebot wurde verkauft" });
+            }
           }, 1000);
 
           offer.seller.get().then((user) => {
@@ -170,7 +175,7 @@ export default class OfferScreen extends Component {
                       </Button>
                     </div>
 
-                    {authentificated && user.uid === seller.id ? (
+                    {authentificated && user.uid === seller.id && (
                       <div className="bg-light rounded mb-3 p-3">
                         <Button
                           variant="danger"
@@ -182,7 +187,7 @@ export default class OfferScreen extends Component {
                           Angebot löschen
                         </Button>
                       </div>
-                    ) : null}
+                    )}
 
                     <div className="bg-light rounded p-3">
                       <h3 className="font-weight-bold">{offer.name}</h3>
@@ -190,14 +195,17 @@ export default class OfferScreen extends Component {
                         {offer.price.toLocaleString(undefined)} €
                       </h5>
                       <p className="mb-0">{countdown}</p>
-                      {authentificated && user.uid !== seller.id && offer.bought === undefined ? (
-                        offer.type === 1 ? (
+                      {authentificated &&
+                        user.uid !== seller.id &&
+                        offer.bought === undefined &&
+                        (offer.type === 1 ? (
                           <form
                             ref={(target) => (this.formRef = target)}
                             onSubmit={(event) => {
                               event.preventDefault();
                               const { bid } = event.target.elements;
                               // TODO Push an string with the current winner of the auction
+                              // TODO Use this.handleBid-function
                               firestore
                                 .collection("offers")
                                 .doc(offer.id)
@@ -239,13 +247,12 @@ export default class OfferScreen extends Component {
                             className="w-100"
                             variant="success"
                             onClick={() => {
-                              this.buy(offer, user);
+                              this.handleBuy(offer, user);
                             }}
                           >
                             Kaufen
                           </Button>
-                        )
-                      ) : null}
+                        ))}
                       <p className="font-weight-bold mb-0">Beschreibung</p>
                       <p className="mb-0">{offer.description}</p>
                     </div>
