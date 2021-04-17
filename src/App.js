@@ -1,7 +1,6 @@
 import React, { Component, createRef } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Firebase, { firestore } from "./Firebase";
-import ReallifeRPG from "./ReallifeRPG";
 // Screens
 import SignIn from "./screens/sign_in/SignIn";
 import SignUp from "./screens/sign_up/SignUp";
@@ -9,7 +8,7 @@ import Profile from "./screens/profile/Profile";
 import OffersScreen from "./screens/offers/OffersScreen";
 import OfferScreen from "./screens/offer/OfferScreen";
 // Components
-import { SetApiKey, VerifyEmail } from "./components/Modals";
+import { VerifyEmail } from "./components/Modals";
 import Moneybar from "./components/Moneybar";
 import Navigation from "./components/Navbar";
 import Breadcrumb from "./components/Breadcrumb";
@@ -59,7 +58,6 @@ export default class App extends Component {
       pid: null,
       verified: true,
     };
-    this.keyModalRef = createRef();
     this.moneyBarRef = createRef();
   }
 
@@ -67,26 +65,20 @@ export default class App extends Component {
     // Check if the user is authentificated
     Firebase.auth().onAuthStateChanged((user) => {
       const verified = user.emailVerified; // True if the user has already verified his email
-      const apiKey = localStorage.getItem("@dag_apiKey");
-      let authentificated = false; // Bcause the user is signed in
+      var authentificated = false; // Bcause the user is signed in
       if (user) {
         authentificated = true;
         const userId = user.uid;
-        // FIXME If we remove this part of code the username of the buy-history won't work
-        // Why? How can I fix this?
         firestore
           .collection("user")
           .doc(userId)
           .get()
-          .finally(() => {
-            apiKey !== null &&
-              new ReallifeRPG().getPlayer(apiKey).then(() => {
-                this.setState({
-                  user: user,
-                  authentificated: authentificated,
-                  verified: verified,
-                });
-              });
+          .then((doc) => {
+            this.setState({
+              user: user,
+              authentificated: authentificated,
+              verified: verified,
+            });
           });
       }
     });
@@ -97,7 +89,6 @@ export default class App extends Component {
     return (
       <Router>
         <div className="App">
-          <SetApiKey shown={false} ref={(target) => (this.keyModalRef = target)} />
           <VerifyEmail shown={!verified} />
           <Moneybar user={user} ref={(target) => (this.moneyBarRef = target)} />
           <Navigation links={links} />
