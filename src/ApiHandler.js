@@ -48,12 +48,47 @@ class User {
 
 class Offer {
   /**
-   *
+   * Create an new offer
+   * @param {object} offerData
+   * @param {File} thumbnail
+   * @param {FileList} productImages
+   * @returns {Promise}
+   */
+  create(offerData, thumbnail, productImages) {
+    return new Promise((res, rej) => {
+      const offerRef = firestore.collection("offers").doc();
+      const offerId = offerRef.id;
+      var uploadThumbnail = this.uploadThumbnail(offerId, thumbnail);
+      var uploadProductImages = this.uploadProductImages(offerId, productImages);
+      var img = { thumbnail: null, product: null };
+
+      Promise.all([uploadThumbnail, uploadProductImages])
+        .then((results) => {
+          img.thumbnail = results[0];
+          img.product = results[1];
+          offerData.images = img;
+          firestore
+            .collection("offers")
+            .doc(offerId)
+            .set(offerData)
+            .then((docRef) => {
+              res(docRef);
+              // this.createOfferDocument(Firebase.auth().currentUser.uid, offerId);
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
+    });
+  }
+
+  /**
+   * Create an Firestore document for the offer containg all required data
+   * @deprecated The offer aren't registered anymore in the user document. Use an Firestore where-query instead to receive the registered offers using an userId
    * @param {string} user
    * @param {string} offer
    * @returns {Promise}
    */
-  create(user, offer) {
+  createOfferDocument(user, offer) {
     return new Promise((res, rej) => {
       firestore
         .collection("user")
@@ -159,17 +194,17 @@ class Offer {
   async delete(offerId) {
     var response = { success: false, message: null };
     const offerRef = firestore.collection("offers").doc(offerId);
-    const offer = await offerRef.get().data();
-    const seller = offer.seller;
-    const sellerRef = firestore.collection("user").doc(seller);
+    const offerDocument = await offerRef.get();
+    const offerData = offerDocument.data();
+    // const sellerRef = offerData.seller;
+    var gotBought = offerData.bought !== undefined;
 
     // Check if the offer already got bought by an user
-    if (offer.bought === undefined) {
+    if (!gotBought) {
       await offerRef.delete();
-      var offerList = await sellerRef.get().data().offers;
-      var newList = offerList.filter((offer) => offerId !== offer);
-      await sellerRef.update({ offers: newList });
-
+      // var offerList = await sellerRef.get().data().offers;
+      // var newList = offerList.filter((offer) => offerId == offer);
+      // await sellerRef.update({ offers: newList });
       response.success = true;
       response.message = "Das Angebot wurde gelöscht";
     } else {
@@ -192,12 +227,45 @@ class Offer {
     var userData = userDoc.data();
     var boughtList = userData.bought;
 
-    var offerUpdate = offerRef.update({
+    // TODO Check if the reference is still required or are we using an where-query to get the bought offers by an user
+    var offerUpdate = await offerRef.update({
       bought: { user: userRef, uid: userId, username: userData.username, at: new Date() },
     });
-    var userUpdate = userRef.update({ bought: boughtList });
+    var userUpdate = await userRef.update({ bought: boughtList });
 
     return { offer: offerUpdate, user: userUpdate };
+  }
+
+  /**
+   *
+   * @param {number} expireDate
+   * @returns {string}
+   */
+  createCountdown(expireDate) {
+    const now = Date.now() / 1000;
+    var expiresAt = expireDate;
+    var diff = expiresAt - now;
+    var countdown;
+    if (diff > 0) {
+      var d = Math.floor(diff / 86400),
+        h = Math.floor((diff - d * 86400) / 3600),
+        hours = h < 10 ? `0${h}` : h,
+        m = Math.floor((diff - d * 86400 - h * 3600) / 60),
+        minutes = m < 10 ? `0${m}` : m,
+        s = Math.floor(diff - d * 86400 - h * 3600 - m * 60),
+        seconds = s < 10 ? `0${s}` : s;
+      if (d !== 0) {
+        countdown =
+          d > 1
+            ? `Verbleibende Zeit: ${d} Tage & ${hours}:${minutes}:${seconds}`
+            : `Verbleibende Zeit: ${d} Tag & ${hours}:${minutes}:${seconds}`;
+      } else {
+        countdown = `Verbleibende Zeit: ${hours}:${minutes}:${seconds}`;
+      }
+    } else {
+      countdown = "Das Angebot ist nicht mehr verfügbar";
+    }
+    return countdown;
   }
 }
 

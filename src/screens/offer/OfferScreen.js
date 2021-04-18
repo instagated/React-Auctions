@@ -1,17 +1,16 @@
 import React, { Component } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import { User, Offer } from "../../ApiHandler";
-import Auction from "../../Auction";
+import { User, Offer, Auction } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastServive from "react-material-toast";
 // Components
 import { Col, Button, InputGroup, FormControl } from "react-bootstrap";
 import Loader from "../../components/Loader";
 import { DeleteOfferModal } from "../../components/Offer";
+import { Redirect } from "react-router-dom";
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
-import { Redirect } from "react-router-dom";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -49,12 +48,13 @@ export default class OfferScreen extends Component {
 
   componentDidMount() {
     const { offerId } = this.state;
-
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
-      user
-        ? this.setState({ authentificated: true, user: user })
-        : this.setState({ authentificated: false });
+      if (user) {
+        this.setState({ authentificated: true, user: user });
+      } else {
+        this.setState({ authentificated: false });
+      }
     });
 
     // Get real-time document changes & update the state
@@ -64,32 +64,45 @@ export default class OfferScreen extends Component {
       .onSnapshot((doc) => {
         if (doc.exists) {
           const offer = doc.data();
+          var gotBought = offer.bought !== undefined;
           offer.id = offerId;
 
-          // FIXME Fix the countdown after the the document got updated
-          offer.bought === undefined
-            ? this.setState({
-                countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-              })
-            : this.setState({ countdown: "Das Angebot wurde verkauft" });
+          new Auction()
+            .getBids(offerId)
+            .then((result) => console.log(result))
+            .catch((err) => console.error(err));
 
+          // FIXME Fix the countdown after the the document got updated
+          if (!gotBought) {
+            this.setState({
+              countdown: new Offer().createCountdown(offer.expiresAt.seconds),
+            });
+          } else {
+            this.setState({ countdown: "Das Angebot wurde verkauft" });
+          }
           setInterval(() => {
-            offer.bought === undefined
-              ? this.setState({
-                  countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-                })
-              : this.setState({ countdown: "Das Angebot wurde verkauft" });
+            if (!gotBought) {
+              this.setState({
+                countdown: new Offer().createCountdown(offer.expiresAt.seconds),
+              });
+            } else {
+              this.setState({ countdown: "Das Angebot wurde verkauft" });
+            }
           }, 1000);
 
-          offer.seller.get().then((user) => {
-            this.setState({
-              found: true,
-              offer: offer,
-              seller: user,
-              thumbnail: offer.images.thumbnail,
-              loading: false,
+          firestore
+            .collection("user")
+            .doc(offer.seller)
+            .get()
+            .then((user) => {
+              this.setState({
+                found: true,
+                offer: offer,
+                seller: user,
+                thumbnail: offer.images.thumbnail,
+                loading: false,
+              });
             });
-          });
         } else {
           this.setState({ loading: false, found: false });
         }
@@ -125,11 +138,10 @@ export default class OfferScreen extends Component {
                     </div>
                     <div className="image-container mb-3">
                       {this._renderProductImage(offer.images.thumbnail)}
-                      {offer.images.product !== null
-                        ? offer.images.product.map((image) => {
-                            return this._renderProductImage(image);
-                          })
-                        : null}
+                      {offer.images.product !== null &&
+                        offer.images.product.map((image) => {
+                          return this._renderProductImage(image);
+                        })}
                     </div>
                   </main>
                 </Col>
@@ -155,7 +167,7 @@ export default class OfferScreen extends Component {
                       </Button>
                     </div>
 
-                    {authentificated && user.uid === seller.id ? (
+                    {authentificated && user.uid === seller.id && (
                       <div className="bg-light rounded mb-3 p-3">
                         <Button
                           variant="danger"
@@ -167,7 +179,7 @@ export default class OfferScreen extends Component {
                           Angebot löschen
                         </Button>
                       </div>
-                    ) : null}
+                    )}
 
                     <div className="bg-light rounded p-3">
                       <h3 className="font-weight-bold">{offer.name}</h3>

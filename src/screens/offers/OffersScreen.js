@@ -1,9 +1,11 @@
 import React, { Component } from "react";
+import { firestore } from "../../Firebase";
+// StyleSheets
 import { Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Offer } from "../../components/Offer";
 import Loader from "../../components/Loader";
-import { firestore } from "../../Firebase";
+// StyleSheets
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default class OffersScreen extends Component {
@@ -20,26 +22,28 @@ export default class OffersScreen extends Component {
       .collection("offers")
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
-        let changes = snapshot.docChanges();
+        const changes = snapshot.docChanges();
         changes.forEach((change) => {
-          let doc = change.doc,
-            data = doc.data(),
-            now = parseInt((Date.now() / 1000).toFixed(0));
+          const document = change.doc;
+          const documentData = document.data();
+          var now = parseInt((Date.now() / 1000).toFixed(0));
+          var changeType = change.type;
+          var gotBought = documentData.bought !== undefined;
 
-          if (change.type === "added") {
-            if (data.expiresAt.seconds > now && data.bought === undefined) {
-              data.id = doc.id;
-              temp.push(data);
+          if (changeType === "added") {
+            if (documentData.expiresAt.seconds > now && !gotBought) {
+              documentData.id = document.id;
+              temp.push(documentData);
             }
-          } else if (change.type === "removed") {
+          } else if (changeType === "removed") {
             temp = temp.filter((offer) => {
-              return offer.id !== doc.id;
+              return offer.id !== document.id;
             });
-          } else if (change.type === "modified") {
+          } else if (changeType === "modified") {
             temp = temp.filter((offer) => {
-              return offer.id !== doc.id;
+              return offer.id !== document.id;
             });
-            temp.push(data);
+            temp.push(documentData);
           }
         });
         this.setState({ offers: temp, loading: false });
@@ -47,7 +51,7 @@ export default class OffersScreen extends Component {
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -65,7 +69,7 @@ export default class OffersScreen extends Component {
                       lg={6}
                       xl={3}
                       key={index}
-                      className={(offers.lenth < 4 ? "mb-md-0" : "", "mb-3 px-0 px-md-3")}
+                      className={(offers.lenth < 4 && "mb-md-0", "mb-3 px-0 px-md-3")}
                     >
                       <div>
                         <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>

@@ -1,7 +1,7 @@
 // TODO Check if this code is still up-to-date & optimize it a little bit
 import React, { Component, createRef } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import { User, Offer as OfferAPI } from "../../ApiHandler";
+import { User } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
 // Components
@@ -121,10 +121,9 @@ class SellHistory extends Component {
 
     if (currentUser) {
       const userId = currentUser.uid;
-      const sellerRef = firestore.collection("user").doc(userId);
       firestore
         .collection("offers")
-        .where("seller", "==", sellerRef)
+        .where("seller", "==", userId)
         .onSnapshot((snapshot) => {
           const docList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
           docList.forEach((document) => {
@@ -223,32 +222,36 @@ class Offers extends Component {
   }
 
   componentDidMount() {
-    const currentUser = Firebase.auth().currentUser;
-    const offerList = [];
-    if (currentUser) {
-      const userId = Firebase.auth().currentUser.uid;
-      const sellerRef = firestore.collection("user").doc(userId);
-      // We don't need to check if the user is signed in because the parent component will check if the
-      // current authentification-state and redirect any user which isn't signed in to the sign-in screen
+    const user = Firebase.auth().currentUser;
+    if (user) {
+      const userId = user.uid;
+      var offerList = [];
       firestore
         .collection("offers")
-        .where("seller", "==", sellerRef)
+        .where("seller", "==", userId)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs.reverse(); // reverse the array so we got them sort by date
+          const documentChanges = snapshot.docChanges();
 
-          if (docList.length > 0) {
-            docList.forEach((document) => {
-              const offerData = document.data();
-              const now = Date.now() / 1000; // Timestamp in seconds
-              if (offerData.bought === undefined && offerData.expiresAt.seconds > now) {
-                offerData.id = document.id;
-                offerList.push(offerData);
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+            var gotBought = documentData.bought !== undefined;
+
+            if (changeType === "added") {
+              if (!gotBought) {
+                documentData.id = document.id;
+                offerList.push(documentData);
               }
-            });
-            this.setState({ offers: offerList, loading: false });
-          } else {
-            this.setState({ offers: offerList, loading: false });
-          }
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id); // FIXME Use an findIndexOf and update the existing object instead of deleteing it and pushing a new one
+              documentData.id = document.id;
+              offerList.push(documentData);
+            }
+          });
+          this.setState({ offers: offerList, loading: false });
         });
     }
   }
@@ -331,13 +334,15 @@ class Profile extends Component {
             const user = Firebase.auth().currentUser;
             const alreadyVerified = user.emailVerified;
             // We're gonna check if the email is already verified bcause if he is he only need to relog
-            alreadyVerified
-              ? this.toast.info(
-                  "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
-                )
-              : this.toast.error(
-                  "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
-                );
+            if (alreadyVerified) {
+              this.toast.info(
+                "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
+              );
+            } else {
+              this.toast.error(
+                "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
+              );
+            }
             break;
 
           default:
