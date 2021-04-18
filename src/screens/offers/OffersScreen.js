@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { Offer } from "../../components/Card";
+import { Offer } from "../../components/Offer";
 import Loader from "../../components/Loader";
 import { firestore } from "../../Firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -70,7 +70,7 @@ export default class OffersScreen extends Component {
                       <div>
                         <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
                           <Offer
-                            canDeleted={false}
+                            deletable={false}
                             type={offer.type}
                             thumbnail={offer.images.thumbnail}
                             name={offer.name}

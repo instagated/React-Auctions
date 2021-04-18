@@ -7,7 +7,7 @@ import ToastServive from "react-material-toast";
 // Components
 import { Col, Button, InputGroup, FormControl } from "react-bootstrap";
 import Loader from "../../components/Loader";
-import { DeleteOffer } from "../../components/Modals";
+import { DeleteOfferModal } from "../../components/Offer";
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
@@ -241,7 +241,7 @@ export default class OfferScreen extends Component {
                 </Col>
               </div>
             </div>
-            <DeleteOffer
+            <DeleteOfferModal
               shown={deleteModal}
               offer={offerId}
               offerName={offer.name}

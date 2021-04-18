@@ -8,8 +8,7 @@ import ToastService from "react-material-toast";
 import { Link, Redirect } from "react-router-dom";
 import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
 import Loader from "../../components/Loader";
-import { Offer } from "../../components/Card";
-import { CreateOffer } from "../../components/Modals";
+import { Offer, CreateOfferModal } from "../../components/Offer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 // Stylesheets
@@ -270,7 +269,7 @@ class Offers extends Component {
                     <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
                       <Offer
                         type={offer.type}
-                        canDeleted={true}
+                        deletable={true}
                         thumbnail={offer.images.thumbnail}
                         name={offer.name}
                         description={offer.description}
@@ -468,7 +467,7 @@ class Profile extends Component {
                   </Tab.Container>
                 </Col>
               </div>
-              <CreateOffer shown={offerModal} ref={(target) => (this.modalRef = target)} />
+              <CreateOfferModal shown={offerModal} ref={(target) => (this.modalRef = target)} />
             </div>
           </section>
         );
