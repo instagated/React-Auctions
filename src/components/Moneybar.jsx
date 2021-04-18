@@ -3,8 +3,6 @@ import { Dropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Firebase from "../Firebase";
 import { User } from "../ApiHandler";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../style/moneybar.scss";
 
@@ -23,13 +21,8 @@ export default class Moneybar extends Component {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                {/* {user !== undefined && <Dropdown.Item>{user.displayName}</Dropdown.Item>} */}
-                <Dropdown.Item href="../Profil/">
-                  {/* <FontAwesomeIcon icon={faUserCircle} className="icon" /> */} Mein Profil
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => Firebase.auth().signOut()}>
-                  {/* <FontAwesomeIcon icon={faSignOutAlt} className="icon" /> */} Abmelden
-                </Dropdown.Item>
+                <Dropdown.Item href="../Profil/">Mein Profil</Dropdown.Item>
+                <Dropdown.Item onClick={() => Firebase.auth().signOut()}>Abmelden</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </div>
