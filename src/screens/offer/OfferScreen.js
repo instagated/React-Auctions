@@ -23,11 +23,15 @@ export default class OfferScreen extends Component {
     this.toast = ToastServive.new(toastConfig);
   }
 
+  /**
+   * Update the Firestore documents & fire an toast
+   * @param {object} offer
+   * @param {object} user
+   */
   handleBuy(offer, user) {
     new Offer()
       .buy(offer.id, user.uid)
       .then((result) => {
-        console.log(result);
         this.toast.success("Du hast den Artikel gekuaft");
       })
       .catch((err) => {
@@ -36,7 +40,25 @@ export default class OfferScreen extends Component {
       });
   }
 
-  handleBid(offer, user, bid) {}
+  /**
+   * Update the Firestore documents & fire an toast
+   * @param {object} offer
+   * @param {object} user
+   * @param {number} bid
+   */
+  handleBid(offer, user, bid) {
+    console.log(offer.id, user.uid, bid);
+    new Auction()
+      .bid(offer.id, user.uid, bid)
+      .then((result) => {
+        console.log(result);
+        this.toast.success("Dein Gebot wurde eingereicht");
+      })
+      .catch((err) => {
+        this.toast.error("daas");
+        console.error("ERROR:", err);
+      });
+  }
 
   componentDidMount() {
     const { offerId } = this.state;
@@ -58,11 +80,6 @@ export default class OfferScreen extends Component {
           const offer = doc.data();
           var gotBought = offer.bought !== undefined;
           offer.id = offerId;
-
-          new Auction()
-            .getBids(offerId)
-            .then((result) => console.log(result))
-            .catch((err) => console.error(err));
 
           // FIXME Fix the countdown after the the document got updated
           if (!gotBought) {
@@ -197,13 +214,7 @@ export default class OfferScreen extends Component {
                             onSubmit={(event) => {
                               event.preventDefault();
                               const { bid } = event.target.elements;
-                              // TODO Push an string with the current winner of the auction
-                              firestore
-                                .collection("offers")
-                                .doc(offer.id)
-                                .update({
-                                  price: parseInt(bid.value),
-                                });
+                              this.handleBid(offer, user, parseInt(bid.value));
                               this.formRef.reset();
                             }}
                           >
@@ -227,9 +238,6 @@ export default class OfferScreen extends Component {
                                   variant="success"
                                   className="px-3"
                                   style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
-                                  onClick={() => {
-                                    // TODO Push the uid from the current user to the offer & set expiresAt to 0
-                                  }}
                                 >
                                   Bieten
                                 </Button>

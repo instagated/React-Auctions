@@ -270,14 +270,77 @@ class Offer {
 }
 
 class Auction extends Offer {
+  /**
+   * Check if an offer is an auction
+   * @param {object} offer Firestore document.data() object
+   * @returns {boolean}
+   */
   isAuction(offer) {
     var offerType = offer.type;
-    return offerType == 1 ? true : false;
+    return offerType === 1 ? true : false;
   }
 
-  bid(offer, user, bid) {}
+  /**
+   *
+   * @param {string} offerId
+   * @param {string} userId
+   * @param {number} bidAmount
+   * @return {[object]}
+   */
+  async bid(offerId, userId, bidAmount) {
+    var bids = await this.getBids(offerId);
+    var offerRef = firestore.collection("offers").doc(offerId);
+    var bid = { user: userId, amount: bidAmount, at: new Date() };
+    if (bids.error == null) {
+      bids.bids.push(bid);
+      await offerRef.update({ bids: bids.bids });
+      await offerRef.update({ price: bidAmount });
+      return { bids: bids.bids, error: null };
+    } else if (bids.bids == undefined && bids.error != null) {
+      await offerRef.update({ bids: [bid] });
+      await offerRef.update({ price: bidAmount });
+      return { bids: [bid], error: null };
+    } else {
+      return bids;
+    }
+  }
 
-  getBids(offer) {}
+  /**
+   * Returns an array of all received bids for an auction
+   * @param {string} offerId
+   * @returns {[object]}
+   */
+  async getBids(offerId) {
+    var offerRef = firestore.collection("offers").doc(offerId);
+    var offerDocument = await offerRef.get();
+    var offerData = offerDocument.data();
+    var isAuction = this.isAuction(offerData);
+
+    if (isAuction) {
+      return offerData.bids !== undefined
+        ? { bids: offerData.bids, error: null }
+        : { bids: undefined, error: "offer/no-bids-placed" };
+    } else {
+      return { bids: null, error: "offer/offer-is-not-an-auction" };
+    }
+  }
+
+  /**
+   * Returns the highest placed bid for an auction
+   * @param {string} offerId
+   * @returns {object}
+   */
+  async getHighestBid(offerId) {
+    var bids = await this.getBids(offerId);
+    if (bids.error == null) {
+      var highestBid = bids.bids.sort((a, b) => {
+        return a.amount > b.amount ? -1 : 1;
+      });
+      return highestBid[0];
+    } else {
+      return bids;
+    }
+  }
 }
 
-export { User, Offer };
+export { User, Offer, Auction };
