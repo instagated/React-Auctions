@@ -4,21 +4,28 @@
 
 #### TODO
 
-- **Gebote** wurden wieder eingefügt
-- **ReallifeRPG** integration entfernen
 - **Countdown** wird nun auch nach einem Update des Dokumentes richtig angezeigt
+- **Gewinner** der Auktion festlegen wenn der Countdown abgelaufen ist (How?)
+- **Mindestgebot** bei Auktionen muss mindestens 1€ über dem aktuellen Gebot eines Benutzers liegen. Wenn noch kein Gebot abgeben wurde reicht es wenn der Startpreis geboten wird
+- Startpreis & Höhstbietenden in der **Verkaufshistorie** für Auktionen anzeigen
 
 #### Hinzugefügt
 
 - **Hamburger** wird im nun auf Tablets angezeigt
+- **Gebote** wurden wieder eingefügt
 
 #### Überarbeitet
 
 - **Navbar Links** wurden erneuert
 - **Footer** überarbeitet
+- **Design & Komponenten** wurden ein wenig überarbeitet
 - **eu.ui-avatars.eu** anstelle der **Steam Profilbilder** verwenden
+- **Fehler bei Verkaufs- & Kaufhistorie** wurde behoben(Einträge haben sich verdoppelt bei Änderungen am Dokument)
 
 #### Entfernt
+
+- **ReallifeRPG** wurde entfernt (Abfrage des Kontostandes, Steam Avatar & Benutzername)
+- **Moneybar** Bargeld, Kontostand, Benutername & Icons wurden entfernt
 
 ---
 
