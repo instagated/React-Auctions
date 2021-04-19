@@ -23,14 +23,6 @@ export default class OfferScreen extends Component {
     this.toast = ToastServive.new(toastConfig);
   }
 
-  _renderProductImage = (image) => {
-    return (
-      <a className="image" onClick={() => this.setState({ thumbnail: image })} key={image}>
-        <img src={image} alt="Produktbild" />
-      </a>
-    );
-  };
-
   handleBuy(offer, user) {
     new Offer()
       .buy(offer.id, user.uid)
@@ -123,6 +115,15 @@ export default class OfferScreen extends Component {
       deleteModal,
     } = this.state;
 
+    const ProductImage = (props) => {
+      const { image } = props;
+      return (
+        <a className="image" onClick={() => this.setState({ thumbnail: image })} key={image}>
+          <img src={image} alt="Produktbild" />
+        </a>
+      );
+    };
+
     if (loading) {
       return <Loader />;
     } else {
@@ -137,10 +138,10 @@ export default class OfferScreen extends Component {
                       <img className="thumbnail" src={thumbnail} alt="Vorschaubild" />
                     </div>
                     <div className="image-container mb-3">
-                      {this._renderProductImage(offer.images.thumbnail)}
+                      <ProductImage image={offer.images.thumbnail} />
                       {offer.images.product !== null &&
                         offer.images.product.map((image) => {
-                          return this._renderProductImage(image);
+                          return <ProductImage image={image} />;
                         })}
                     </div>
                   </main>
