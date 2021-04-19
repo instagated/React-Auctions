@@ -37,11 +37,23 @@ class BuyHistory extends Component {
         .collection("offers")
         .where("bought.uid", "==", sellerUid)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs;
-          docList.forEach((document) => {
-            var offer = document.data();
-            offer.id = document.id;
-            offerList.push(offer);
+          const documentChanges = snapshot.docChanges();
+
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+
+            if (changeType === "added") {
+              documentData.id = document.id;
+              offerList.push(documentData);
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+              documentData.id = document.id;
+              offerList.push(documentData);
+            }
           });
           this.setState({ offers: offerList, loading: false });
         });
@@ -117,19 +129,31 @@ class SellHistory extends Component {
 
   componentDidMount() {
     const currentUser = Firebase.auth().currentUser;
-    const offerList = [];
 
     if (currentUser) {
       const userId = currentUser.uid;
+      var offerList = [];
       firestore
         .collection("offers")
         .where("seller", "==", userId)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
-          docList.forEach((document) => {
-            var offer = document.data();
-            offer.id = document.id;
-            offerList.push(offer);
+          const documentChanges = snapshot.docChanges();
+
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+
+            if (changeType === "added") {
+              documentData.id = document.id;
+              offerList.push(documentData);
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+              documentData.id = document.id;
+              offerList.push(documentData);
+            }
           });
           this.setState({ offers: offerList, loading: false });
         });
