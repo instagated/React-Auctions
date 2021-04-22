@@ -1,5 +1,29 @@
 <h1 align="center">Changelogs</h1>
 
+## :bookmark: [React-Auctions v1.0.0](https://github.com/tklein1801/React-Auctions/releases/tag/v1.0.0)
+
+#### Hinzugefügt
+
+- **Gewinner** der Auktion festlegen wenn der Countdown abgelaufen ist
+- **Hamburger** wird im nun auf Tablets angezeigt
+- **Gebote** wurden wieder eingefügt
+  - Höhstbietender in der **Verkaufshistorie** für Auktionen anzeigen
+
+#### Überarbeitet
+
+- **Navbar Links** wurden erneuert
+- **Footer** überarbeitet
+- **Design & Komponenten** wurden ein wenig überarbeitet
+- **eu.ui-avatars.eu** anstelle der **Steam Profilbilder** verwenden
+- **Fehler bei Verkaufs- & Kaufhistorie** wurde behoben(Einträge haben sich verdoppelt bei Änderungen am Dokument)
+
+#### Entfernt
+
+- **ReallifeRPG** wurde entfernt (Abfrage des Kontostandes, Steam Avatar & Benutzername)
+- **Moneybar** Bargeld, Kontostand, Benutername & Icons wurden entfernt
+
+---
+
 ## :bookmark: [React-Auctions v0.4.2](https://github.com/tklein1801/React-Auctions/releases/tag/v0.4.2)
 
 #### Hinzugefügt

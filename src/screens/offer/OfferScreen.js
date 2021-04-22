@@ -1,17 +1,16 @@
 import React, { Component } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import Auction from "../../Auction";
-import ReallifeRPG from "../../ReallifeRPG";
+import { User, Offer, Auction } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastServive from "react-material-toast";
 // Components
 import { Col, Button, InputGroup, FormControl } from "react-bootstrap";
 import Loader from "../../components/Loader";
-import { DeleteOffer } from "../../components/Modals";
+import { DeleteOfferModal } from "../../components/Offer";
+import { Redirect } from "react-router-dom";
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./OfferScreen.scss";
-import { Redirect } from "react-router-dom";
 
 export default class OfferScreen extends Component {
   constructor() {
@@ -24,49 +23,51 @@ export default class OfferScreen extends Component {
     this.toast = ToastServive.new(toastConfig);
   }
 
-  _renderProductImage = (image) => {
-    return (
-      <a className="image" onClick={() => this.setState({ thumbnail: image })} key={image}>
-        <img src={image} alt="Produktbild" />
-      </a>
-    );
-  };
-  buy(offer, user) {
-    new ReallifeRPG().getPlayer(localStorage.getItem("@dag_apiKey")).then((player) => {
-      const playerData = player.data[0],
-        pid = playerData.pid,
-        cash = parseInt(playerData.cash),
-        bank = parseInt(playerData.bankacc),
-        total = cash + bank;
-
-      if (this.checkBalance(offer.price, total)) {
-        new Auction()
-          .buy(user.uid, pid, offer.id)
-          .then((res) => {
-            this.toast.success(`Du hast den Artikel ${offer.name} gekauft`);
-          })
-          .catch((err) => {
-            console.error("[Auctions]", err);
-            this.toast.error("Etwas ist schief gelaufen");
-          });
-      } else {
-        this.toast.error("Du hast nicht ausreichend Geld für dieses Angebot");
-      }
-    });
+  /**
+   * Update the Firestore documents & fire an toast
+   * @param {object} offer
+   * @param {object} user
+   */
+  handleBuy(offer, user) {
+    new Offer()
+      .buy(offer.id, user.uid)
+      .then((result) => {
+        this.toast.success("Du hast den Artikel gekuaft");
+      })
+      .catch((err) => {
+        console.error("ERROR:", err);
+        this.toast.error("Etwas ist schief gelaufen");
+      });
   }
 
-  checkBalance(requiredBalance, totalBalance) {
-    return totalBalance >= requiredBalance;
+  /**
+   * Update the Firestore documents & fire an toast
+   * @param {object} offer
+   * @param {object} user
+   * @param {number} bid
+   */
+  handleBid(offer, user, bid) {
+    new Auction()
+      .bid(offer.id, { id: user.uid, username: user.displayName }, bid)
+      .then((result) => {
+        // console.log(result);
+        this.toast.success("Dein Gebot wurde eingereicht");
+      })
+      .catch((err) => {
+        this.toast.error("Das Gebot konnte nicht eingereicht werden");
+        console.error("ERROR:", err);
+      });
   }
 
   componentDidMount() {
     const { offerId } = this.state;
-
     // Check if the user is signed in via Firebase
     Firebase.auth().onAuthStateChanged((user) => {
-      user
-        ? this.setState({ authentificated: true, user: user })
-        : this.setState({ authentificated: false });
+      if (user) {
+        this.setState({ authentificated: true, user: user });
+      } else {
+        this.setState({ authentificated: false });
+      }
     });
 
     // Get real-time document changes & update the state
@@ -75,32 +76,42 @@ export default class OfferScreen extends Component {
       .doc(offerId)
       .onSnapshot((doc) => {
         if (doc.exists) {
-          let offer = doc.data();
+          const offer = doc.data();
+          var gotBought = offer.bought !== undefined;
           offer.id = offerId;
 
-          offer.bought === undefined
-            ? this.setState({
-                countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-              })
-            : this.setState({ countdown: "Das Angebot wurde verkauft" });
+          // FIXME Fix the countdown after the the document got updated
+          if (!gotBought) {
+            this.setState({
+              countdown: new Offer().createCountdown(offer.expiresAt.seconds),
+            });
+          } else {
+            this.setState({ countdown: "Das Angebot wurde verkauft" });
+          }
 
           setInterval(() => {
-            offer.bought === undefined
-              ? this.setState({
-                  countdown: new Auction().createCountdown(offer.expiresAt.seconds),
-                })
-              : this.setState({ countdown: "Das Angebot wurde verkauft" });
+            if (!gotBought) {
+              this.setState({
+                countdown: new Offer().createCountdown(offer.expiresAt.seconds),
+              });
+            } else {
+              this.setState({ countdown: "Das Angebot wurde verkauft" });
+            }
           }, 1000);
 
-          offer.seller.get().then((user) => {
-            this.setState({
-              found: true,
-              offer: offer,
-              seller: user,
-              thumbnail: offer.images.thumbnail,
-              loading: false,
+          firestore
+            .collection("user")
+            .doc(offer.seller)
+            .get()
+            .then((user) => {
+              this.setState({
+                found: true,
+                offer: offer,
+                seller: user,
+                thumbnail: offer.images.thumbnail,
+                loading: false,
+              });
             });
-          });
         } else {
           this.setState({ loading: false, found: false });
         }
@@ -108,7 +119,7 @@ export default class OfferScreen extends Component {
   }
 
   render() {
-    let {
+    const {
       loading,
       found,
       authentificated,
@@ -121,10 +132,18 @@ export default class OfferScreen extends Component {
       deleteModal,
     } = this.state;
 
+    const ProductImage = (props) => {
+      const { image } = props;
+      return (
+        <a className="image" onClick={() => this.setState({ thumbnail: image })} key={image}>
+          <img src={image} alt="Produktbild" />
+        </a>
+      );
+    };
+
     if (loading) {
       return <Loader />;
     } else {
-      // FIXME Get the avatar from the instead of using the DulliAG logo
       if (found) {
         return (
           <section className="offer">
@@ -136,12 +155,11 @@ export default class OfferScreen extends Component {
                       <img className="thumbnail" src={thumbnail} alt="Vorschaubild" />
                     </div>
                     <div className="image-container mb-3">
-                      {this._renderProductImage(offer.images.thumbnail)}
-                      {offer.images.product !== null
-                        ? offer.images.product.map((image) => {
-                            return this._renderProductImage(image);
-                          })
-                        : null}
+                      <ProductImage image={offer.images.thumbnail} />
+                      {offer.images.product !== null &&
+                        offer.images.product.map((image) => {
+                          return <ProductImage image={image} />;
+                        })}
                     </div>
                   </main>
                 </Col>
@@ -152,7 +170,7 @@ export default class OfferScreen extends Component {
                         <img
                           style={{ width: "2.5rem", height: "auto", marginRight: 3 }}
                           className="rounded-circle shadow-md"
-                          src={"https://files.dulliag.de/web/images/logo.jpg"}
+                          src={new User().getAvatar(seller.data().username)}
                           alt="Profilbild"
                         />{" "}
                         {seller.data().username}
@@ -167,7 +185,7 @@ export default class OfferScreen extends Component {
                       </Button>
                     </div>
 
-                    {authentificated && user.uid === seller.id ? (
+                    {authentificated && user.uid === seller.id && (
                       <div className="bg-light rounded mb-3 p-3">
                         <Button
                           variant="danger"
@@ -179,7 +197,7 @@ export default class OfferScreen extends Component {
                           Angebot löschen
                         </Button>
                       </div>
-                    ) : null}
+                    )}
 
                     <div className="bg-light rounded p-3">
                       <h3 className="font-weight-bold">{offer.name}</h3>
@@ -187,20 +205,16 @@ export default class OfferScreen extends Component {
                         {offer.price.toLocaleString(undefined)} €
                       </h5>
                       <p className="mb-0">{countdown}</p>
-                      {authentificated && user.uid !== seller.id && offer.bought === undefined ? (
-                        offer.type === 1 ? (
+                      {authentificated &&
+                        user.uid !== seller.id &&
+                        offer.bought === undefined &&
+                        (offer.type === 1 ? (
                           <form
                             ref={(target) => (this.formRef = target)}
                             onSubmit={(event) => {
                               event.preventDefault();
                               const { bid } = event.target.elements;
-                              // TODO Push an string with the current winner of the auction
-                              firestore
-                                .collection("offers")
-                                .doc(offer.id)
-                                .update({
-                                  price: parseInt(bid.value),
-                                });
+                              this.handleBid(offer, user, parseInt(bid.value));
                               this.formRef.reset();
                             }}
                           >
@@ -211,6 +225,8 @@ export default class OfferScreen extends Component {
                                 min={offer.price + 1}
                                 id="bid"
                                 className="bg-light"
+                                // FIXME Check if there is already an bid on this article. If not we're gonna use the current price from the database
+                                // If there is already an bid the user have to add another dollar to overbid the current bid
                                 placeholder={
                                   "Min. " + (offer.price + 1).toLocaleString(undefined) + " €"
                                 }
@@ -222,9 +238,6 @@ export default class OfferScreen extends Component {
                                   variant="success"
                                   className="px-3"
                                   style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
-                                  onClick={() => {
-                                    // TODO Push the uid from the current user to the offer & set expiresAt to 0
-                                  }}
                                 >
                                   Bieten
                                 </Button>
@@ -236,13 +249,12 @@ export default class OfferScreen extends Component {
                             className="w-100"
                             variant="success"
                             onClick={() => {
-                              this.buy(offer, user);
+                              this.handleBuy(offer, user);
                             }}
                           >
                             Kaufen
                           </Button>
-                        )
-                      ) : null}
+                        ))}
                       <p className="font-weight-bold mb-0">Beschreibung</p>
                       <p className="mb-0">{offer.description}</p>
                     </div>
@@ -250,7 +262,7 @@ export default class OfferScreen extends Component {
                 </Col>
               </div>
             </div>
-            <DeleteOffer
+            <DeleteOfferModal
               shown={deleteModal}
               offer={offerId}
               offerName={offer.name}

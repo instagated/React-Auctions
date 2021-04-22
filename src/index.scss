@@ -147,6 +147,9 @@ body {
       .modal-footer {
         padding-top: 0;
         border-top: 0px;
+        .btn-white:hover {
+          background-color: $light;
+        }
       }
     }
   }

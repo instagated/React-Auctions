@@ -9,7 +9,6 @@
     transition: all 0.3s ease 0s;
     font-size: 1.5rem;
     font-family: "Quicksand-Bold";
-
     &:hover {
       color: $primary;
     }
@@ -18,14 +17,48 @@
   .link {
     transition: all 0.3s ease 0s;
     color: $textColor !important;
-
     &:hover {
       color: $primary !important;
     }
-
     &.active {
       font-weight: bold;
       color: $primary !important;
+    }
+  }
+
+  .menu-toggler {
+    padding: 0;
+    border: none;
+
+    .hamburger {
+      display: none;
+      .btn-line {
+        transition: all 0.3s ease-out;
+        width: 1.75rem;
+        height: 0.125rem;
+        margin-bottom: 5px;
+        background-color: $textColor;
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+    }
+    &.active {
+      .btn-line {
+        background-color: $primary;
+      }
+      .btn-line:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+      .btn-line:nth-child(2) {
+        opacity: 0;
+      }
+      .btn-line:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+      }
+    }
+    &:focus {
+      outline: none;
     }
   }
 }
@@ -36,6 +69,9 @@
 
 // Medium devices (tablets, up to 992px)
 @media (max-width: 992px) {
+  .hamburger {
+    display: unset !important;
+  }
 }
 
 // Small devices (landscape phones, up to 768px)
@@ -51,41 +87,7 @@
     }
   }
 
-  .menu-toggler {
-    padding: 0;
-    border: none;
-
-    .hamburger {
-      .btn-line {
-        transition: all 0.3s ease-out;
-        width: 1.75rem;
-        height: 0.125rem;
-        margin-bottom: 5px;
-        background-color: $textColor;
-
-        &:last-of-type {
-          margin-bottom: 0;
-        }
-      }
-    }
-
-    &.active {
-      .btn-line {
-        background-color: $primary;
-      }
-      .btn-line:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-      }
-      .btn-line:nth-child(2) {
-        opacity: 0;
-      }
-      .btn-line:nth-child(3) {
-        transform: rotate(-45deg) translate(5px, -5px);
-      }
-    }
-
-    &:focus {
-      outline: none;
-    }
+  .hamburger {
+    display: unset !important;
   }
 }

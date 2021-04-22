@@ -1,6 +1,7 @@
+// TODO Check if this code is still up-to-date & optimize it a little bit
 import React, { Component, createRef } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import ReallifeRPG from "../../ReallifeRPG";
+import { User, Auction } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
 // Components
@@ -18,14 +19,15 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import Loader from "../../components/Loader";
-import { Offer } from "../../components/Card";
-import { CreateOffer } from "../../components/Modals";
+import { Offer, CreateOfferModal } from "../../components/Offer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
-import Auction from "../../Auction";
+
+const UserHandler = new User();
+const AuctionHandler = new Auction();
 
 class BuyHistory extends Component {
   constructor() {
@@ -36,25 +38,34 @@ class BuyHistory extends Component {
   }
 
   componentDidMount() {
-    const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid,
-      offerList = [];
+    const currentUser = Firebase.auth().currentUser;
+    var offerList = [];
 
     if (currentUser) {
-      const sellerRef = firestore.collection("user").doc(userId),
-        sellerUid = sellerRef.id; // Should be equal with userId/currentUser.uid
+      const userId = currentUser.uid;
+      const sellerRef = firestore.collection("user").doc(userId);
+      const sellerUid = sellerRef.id; // Should be equal with userId/currentUser.uid
       firestore
         .collection("offers")
         .where("bought.uid", "==", sellerUid)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs;
-          docList.forEach((document) => {
-            const offer = document.data();
-            new Auction()
-              .getUsername(offer.bought.uid)
-              .then((username) => (offer.bought.username = username));
-            offer.id = document.id;
-            offerList.push(offer);
+          const documentChanges = snapshot.docChanges();
+
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+
+            if (changeType === "added") {
+              documentData.id = document.id;
+              offerList.push(documentData);
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+              documentData.id = document.id;
+              offerList.push(documentData);
+            }
           });
           this.setState({ offers: offerList, loading: false });
         });
@@ -62,7 +73,7 @@ class BuyHistory extends Component {
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -129,39 +140,40 @@ class SellHistory extends Component {
   }
 
   componentDidMount() {
-    const currentUser = Firebase.auth().currentUser,
-      userId = currentUser.uid,
-      offerList = [];
+    const currentUser = Firebase.auth().currentUser;
 
     if (currentUser) {
-      const sellerRef = firestore.collection("user").doc(userId);
+      const userId = currentUser.uid;
+      var offerList = [];
       firestore
         .collection("offers")
-        .where("seller", "==", sellerRef)
+        .where("seller", "==", userId)
         .onSnapshot((snapshot) => {
-          const docList = snapshot.docs.reverse(); // reverse the array so get got the items sorted by the newest
+          const documentChanges = snapshot.docChanges();
 
-          if (docList.length > 0) {
-            docList.forEach((document) => {
-              const offer = document.data();
-              offer.id = document.id;
-              if (offer.bought !== undefined) {
-                new Auction()
-                  .getUsername(offer.bought.uid)
-                  .then((username) => (offer.bought.username = username));
-              }
-              offerList.push(offer);
-            });
-            this.setState({ offers: offerList, loading: false });
-          } else {
-            this.setState({ offers: offerList, loading: false });
-          }
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+
+            if (changeType === "added") {
+              documentData.id = document.id;
+              offerList.push(documentData);
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+              documentData.id = document.id;
+              offerList.push(documentData);
+            }
+          });
+          this.setState({ offers: offerList, loading: false });
         });
     }
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -181,8 +193,14 @@ class SellHistory extends Component {
             <tbody>
               {offers.length > 0 ? (
                 offers.map((offer, index) => {
-                  const now = Date.now() / 1000, // We're using timestamp in seconds
-                    expireDiff = offer.expiresAt.seconds - now;
+                  const now = Date.now() / 1000; // We're using timestamp in seconds
+                  const expireDiff = offer.expiresAt.seconds - now;
+                  var isAuction = AuctionHandler.isAuction(offer);
+                  var gotBought = offer.bought !== undefined;
+                  var receivedBids = offer.bids !== undefined && offer.bids.length > 0;
+                  var username = gotBought ? offer.bought.username : "Kein Käufer";
+                  var highestBid = receivedBids ? offer.bids[offer.bids.length - 1] : null;
+
                   return (
                     <tr key={index} className="text-center">
                       <td>
@@ -195,9 +213,7 @@ class SellHistory extends Component {
                         )}
                       </td>
                       <td>
-                        <Badge variant="success">
-                          {offer.type === 1 ? "Auktion" : "Sofortkauf"}
-                        </Badge>
+                        <Badge variant="success">{isAuction ? "Auktion" : "Sofortkauf"}</Badge>
                       </td>
                       <td>
                         <Link
@@ -213,15 +229,14 @@ class SellHistory extends Component {
                         </p>
                       </td>
                       <td>
-                        {offer.bought !== undefined ? (
+                        {receivedBids ? (
                           <OverlayTrigger
-                            placement={"top"}
-                            overlay={<Tooltip>PlayerId: {offer.bought.pid}</Tooltip>}
+                            overlay={<Tooltip id="tooltip-disabled">{highestBid.username}</Tooltip>}
                           >
-                            <p className="font-weight-bold mb-0">{offer.bought.username}</p>
+                            <p className="font-weight-bold mb-0">{username}</p>
                           </OverlayTrigger>
                         ) : (
-                          <p className="font-weight-bold mb-0">Kein Käufer</p>
+                          <p className="font-weight-bold mb-0">{username}</p>
                         )}
                       </td>
                     </tr>
@@ -251,35 +266,42 @@ class Offers extends Component {
   }
 
   componentDidMount() {
-    const offerList = [],
-      userId = Firebase.auth().currentUser.uid,
-      sellerRef = firestore.collection("user").doc(userId);
-    // We don't need to check if the user is signed in because the parent component will check if the
-    // current authentification-state and redirect any user which isn't signed in to the sign-in screen
-    firestore
-      .collection("offers")
-      .where("seller", "==", sellerRef)
-      .onSnapshot((snapshot) => {
-        const docList = snapshot.docs.reverse(); // reverse the array so we got them sort by date
+    const user = Firebase.auth().currentUser;
+    if (user) {
+      const userId = user.uid;
+      var offerList = [];
+      firestore
+        .collection("offers")
+        .where("seller", "==", userId)
+        .onSnapshot((snapshot) => {
+          const documentChanges = snapshot.docChanges();
 
-        if (docList.length > 0) {
-          docList.forEach((document) => {
-            const offerData = document.data(),
-              now = Date.now() / 1000;
-            if (offerData.bought === undefined && offerData.expiresAt.seconds > now) {
-              offerData.id = document.id;
-              offerList.push(offerData);
+          documentChanges.forEach((change) => {
+            const document = change.doc;
+            const documentData = document.data();
+            var changeType = change.type;
+            var gotBought = documentData.bought !== undefined;
+
+            if (changeType === "added") {
+              if (!gotBought) {
+                documentData.id = document.id;
+                offerList.push(documentData);
+              }
+            } else if (changeType === "removed") {
+              offerList = offerList.filter((offer) => offer.id !== document.id);
+            } else if (changeType === "modified") {
+              offerList = offerList.filter((offer) => offer.id !== document.id); // FIXME Use an findIndexOf and update the existing object instead of deleteing it and pushing a new one
+              documentData.id = document.id;
+              offerList.push(documentData);
             }
           });
           this.setState({ offers: offerList, loading: false });
-        } else {
-          this.setState({ offers: offerList, loading: false });
-        }
-      });
+        });
+    }
   }
 
   render() {
-    let { loading, offers } = this.state;
+    const { loading, offers } = this.state;
 
     if (loading) {
       return <Loader />;
@@ -294,7 +316,7 @@ class Offers extends Component {
                     <Link to={`/Angebot/${offer.id}`} style={{ textDecoration: "none" }}>
                       <Offer
                         type={offer.type}
-                        canDeleted={true}
+                        deletable={true}
                         thumbnail={offer.images.thumbnail}
                         name={offer.name}
                         description={offer.description}
@@ -336,19 +358,16 @@ class Profile extends Component {
   handleProfileSubmit = (e) => {
     e.preventDefault();
     const { user } = this.state;
-    const { email, password, apiKey } = e.target.elements,
-      authentificatedUser = Firebase.auth().currentUser;
-    console.log(email.value, password.value, apiKey.value);
+    const { email, password } = e.target.elements;
+    const authentificatedUser = Firebase.auth().currentUser;
 
-    let updateEmail =
+    var updateEmail =
         email.value !== user.email ? authentificatedUser.updateEmail(email.value) : null,
       updatePassword =
-        password.value !== "" ? authentificatedUser.updatePassword(password.value) : null,
-      updateKey =
-        apiKey.value !== user.apiKey ? localStorage.setItem("@dag_apiKey", apiKey.value) : null;
+        password.value !== "" ? authentificatedUser.updatePassword(password.value) : null;
 
     this.toggleProfileState();
-    Promise.all([updateEmail, updatePassword, updateKey])
+    Promise.all([updateEmail, updatePassword])
       .then(() => {
         this.toast.success("Die Änderungen wurden gespeichert");
       })
@@ -356,17 +375,20 @@ class Profile extends Component {
         console.error(err);
         switch (err.code) {
           case "auth/requires-recent-login":
-            const user = Firebase.auth().currentUser,
-              alreadyVerified = user.emailVerified;
+            const user = Firebase.auth().currentUser;
+            const alreadyVerified = user.emailVerified;
             // We're gonna check if the email is already verified bcause if he is he only need to relog
-            alreadyVerified
-              ? this.toast.info(
-                  "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
-                )
-              : this.toast.error(
-                  "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
-                );
+            if (alreadyVerified) {
+              this.toast.info(
+                "Bitte melde dich einmal neu an bevor du dein Profil bearbeiten kannst"
+              );
+            } else {
+              this.toast.error(
+                "Du musst deine E-Mail Adresse erst bestätigen bevor du sie ändern kannst"
+              );
+            }
             break;
+
           default:
             this.toast.error("Die Änderungen konnten nicht gespeichert werden");
             break;
@@ -385,18 +407,13 @@ class Profile extends Component {
           .get()
           .then((doc) => {
             user.username = doc.data().username;
-            user.apiKey = localStorage.getItem("@dag_apiKey");
-            const avatar = new ReallifeRPG().getPlayer(user.apiKey);
-            avatar.then((response) => {
-              const avatar_full = response.data[0].avatar_full;
-              this.setState({
-                authentificated: true,
-                loading: false,
-                avatar: avatar_full,
-                user: user,
-                email: user.email,
-                apiKey: localStorage.getItem("@dag_apiKey"),
-              });
+            var avatarUrl = UserHandler.getAvatar(user.username);
+            this.setState({
+              authentificated: true,
+              loading: false,
+              avatar: avatarUrl,
+              user: user,
+              email: user.email,
             });
           });
       } else {
@@ -406,8 +423,8 @@ class Profile extends Component {
   }
 
   render() {
-    let { loading, authentificated } = this.state;
-    let { editProfile, avatar, user, email, apiKey, offerModal } = this.state;
+    const { loading, authentificated } = this.state;
+    const { editProfile, avatar, user, email, offerModal } = this.state;
 
     if (loading) {
       return null;
@@ -417,7 +434,13 @@ class Profile extends Component {
           <section>
             <div>
               <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-                <Col id="profile-container" className="px-0 px-md-3" xs={12} md={4} lg={4}>
+                <Col
+                  id="profile-container"
+                  className="px-0 px-md-3 mb-3 mb-md-0"
+                  xs={12}
+                  md={4}
+                  lg={4}
+                >
                   <div className="bg-light w-100 p-4 rounded">
                     <img id="avatar" className="mb-3" alt="Profilbild" src={avatar} />
                     <form onSubmit={this.handleProfileSubmit}>
@@ -433,12 +456,11 @@ class Profile extends Component {
                           variant="outline-secondary"
                           onClick={() => {
                             this.toggleProfileState();
-                            this.setState({ email: user.email, apiKey: user.apiKey });
+                            this.setState({ email: user.email });
                           }}
                         >
                           Abbrechen
                         </Button>
-                        {/* TODO Submit the new profile data */}
                         <Button type="submit" variant="success">
                           Speichern
                         </Button>
@@ -463,17 +485,6 @@ class Profile extends Component {
                           readOnly={!editProfile}
                           placeholder="Passwort unsichtbar"
                           onChange={(e) => this.setState({ password: e.target.value })}
-                        />
-                      </Form.Group>
-
-                      <Form.Group className="mb-0">
-                        <Form.Label className="font-weight-bold">API-Key</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="apiKey"
-                          readOnly={!editProfile}
-                          value={apiKey}
-                          onChange={(e) => this.setState({ apiKey: e.target.value })}
                         />
                       </Form.Group>
                     </form>
@@ -505,7 +516,7 @@ class Profile extends Component {
                   </Tab.Container>
                 </Col>
               </div>
-              <CreateOffer shown={offerModal} ref={(target) => (this.modalRef = target)} />
+              <CreateOfferModal shown={offerModal} ref={(target) => (this.modalRef = target)} />
             </div>
           </section>
         );
