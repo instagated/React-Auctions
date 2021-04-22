@@ -5,14 +5,13 @@
 #### TODO
 
 - **Countdown** wird nun auch nach einem Update des Dokumentes richtig angezeigt
-- **Gewinner** der Auktion festlegen wenn der Countdown abgelaufen ist (How?)
-- **Mindestgebot** bei Auktionen muss mindestens 1€ über dem aktuellen Gebot eines Benutzers liegen. Wenn noch kein Gebot abgeben wurde reicht es wenn der Startpreis geboten wird
-- Startpreis & Höhstbietenden in der **Verkaufshistorie** für Auktionen anzeigen
 
 #### Hinzugefügt
 
+- **Gewinner** der Auktion festlegen wenn der Countdown abgelaufen ist
 - **Hamburger** wird im nun auf Tablets angezeigt
 - **Gebote** wurden wieder eingefügt
+  - Höhstbietender in der **Verkaufshistorie** für Auktionen anzeigen
 
 #### Überarbeitet
 
