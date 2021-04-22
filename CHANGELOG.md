@@ -2,10 +2,6 @@
 
 ## :bookmark: [React-Auctions v1.0.0](https://github.com/tklein1801/React-Auctions/releases/tag/v1.0.0)
 
-#### TODO
-
-- **Countdown** wird nun auch nach einem Update des Dokumentes richtig angezeigt
-
 #### Hinzugefügt
 
 - **Gewinner** der Auktion festlegen wenn der Countdown abgelaufen ist
