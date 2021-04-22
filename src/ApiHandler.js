@@ -3,7 +3,7 @@ import Firebase, { firestore } from "./Firebase";
 class User {
   /**
    *
-   * @param {string} user Firestore document-id
+   * @param {string} userId Firestore document-id
    * @returns {string} username
    */
   async getUsername(userId) {
@@ -84,20 +84,20 @@ class Offer {
   /**
    * Create an Firestore document for the offer containg all required data
    * @deprecated The offer aren't registered anymore in the user document. Use an Firestore where-query instead to receive the registered offers using an userId
-   * @param {string} user
-   * @param {string} offer
+   * @param {string} userId
+   * @param {string} offerId
    * @returns {Promise}
    */
-  createOfferDocument(user, offer) {
+  createOfferDocument(userId, offerId) {
     return new Promise((res, rej) => {
       firestore
         .collection("user")
-        .doc(user)
+        .doc(userId)
         .get()
         .then((docRef) => {
           var offerList = docRef.data().offers;
-          offerList.push(offer);
-          firestore.collection("user").doc(user).update({
+          offerList.push(offerId);
+          firestore.collection("user").doc(userId).update({
             offers: offerList,
           });
           res(offerList);
@@ -108,13 +108,13 @@ class Offer {
 
   /**
    * Upload the offer thumbnail up to our Firebase Storage
-   * @param {string} offer Document Id
+   * @param {string} offerId Document Id
    * @param {File} thumbnail
    * @returns {Promise}
    */
-  uploadThumbnail(offer, thumbnail) {
+  uploadThumbnail(offerId, thumbnail) {
     return new Promise((res, rej) => {
-      const thumbnailRef = Firebase.storage().ref(`offers/${offer}/thumbnail/${thumbnail.name}`),
+      const thumbnailRef = Firebase.storage().ref(`offers/${offerId}/thumbnail/${thumbnail.name}`),
         uploadThumbnail = thumbnailRef.put(thumbnail);
 
       // Upload the thumbnail
@@ -135,17 +135,17 @@ class Offer {
 
   /**
    * Upload the product-images in our Firebase Storage
-   * @param {string} offer Document Id
+   * @param {string} offerId Document Id
    * @param {FileList} productImages
    * @returns {Promise}
    */
-  uploadProductImages(offer, productImages) {
+  uploadProductImages(offerId, productImages) {
     return new Promise((res, rej) => {
       var images = [];
       if (productImages.length > 0) {
         for (let i = 0; i < productImages.length; i++) {
           const image = productImages[i];
-          const imageRef = Firebase.storage().ref(`offers/${offer}/product/${image.name}`);
+          const imageRef = Firebase.storage().ref(`offers/${offerId}/product/${image.name}`);
           const task = imageRef.put(image);
           task.on(
             "state_changed",
@@ -283,20 +283,26 @@ class Auction extends Offer {
   /**
    *
    * @param {string} offerId
-   * @param {string} userId
+   * @param {object} userInformation { id: Firebase.auth().currentUser.uid, username: Firebase.auth().currentUser.displayName }
    * @param {number} bidAmount
    * @return {[object]}
    */
-  async bid(offerId, userId, bidAmount) {
+  async bid(offerId, userInformation, bidAmount) {
     var bids = await this.getBids(offerId);
     var offerRef = firestore.collection("offers").doc(offerId);
-    var bid = { user: userId, amount: bidAmount, at: new Date() };
+    var bid = {
+      user: userInformation.id,
+      username: userInformation.username,
+      amount: bidAmount,
+      at: new Date(),
+    };
+
     if (bids.error == null) {
       bids.bids.push(bid);
       await offerRef.update({ bids: bids.bids });
       await offerRef.update({ price: bidAmount });
       return { bids: bids.bids, error: null };
-    } else if (bids.bids == undefined && bids.error != null) {
+    } else if (bids.bids === undefined && bids.error !== null) {
       await offerRef.update({ bids: [bid] });
       await offerRef.update({ price: bidAmount });
       return { bids: [bid], error: null };
