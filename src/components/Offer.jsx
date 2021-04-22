@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { toast as toastConfig } from "../config.json";
 import ToastService from "react-material-toast";
-import Firebase, { firestore } from "../Firebase";
+import Firebase from "../Firebase";
 import { Offer as OfferAPI } from "../ApiHandler";
 // Components
 import { Card, Badge, Modal, Button, Form, Col, Spinner } from "react-bootstrap";

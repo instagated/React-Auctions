@@ -227,7 +227,6 @@ class Offer {
     var userData = userDoc.data();
     var boughtList = userData.bought;
 
-    // TODO Check if the reference is still required or are we using an where-query to get the bought offers by an user
     var offerUpdate = await offerRef.update({
       bought: { user: userRef, uid: userId, username: userData.username, at: new Date() },
     });

@@ -47,15 +47,14 @@ export default class OfferScreen extends Component {
    * @param {number} bid
    */
   handleBid(offer, user, bid) {
-    console.log(offer.id, user.uid, bid);
     new Auction()
-      .bid(offer.id, user.uid, bid)
+      .bid(offer.id, { id: user.uid, username: user.displayName }, bid)
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         this.toast.success("Dein Gebot wurde eingereicht");
       })
       .catch((err) => {
-        this.toast.error("daas");
+        this.toast.error("Das Gebot konnte nicht eingereicht werden");
         console.error("ERROR:", err);
       });
   }
@@ -89,6 +88,7 @@ export default class OfferScreen extends Component {
           } else {
             this.setState({ countdown: "Das Angebot wurde verkauft" });
           }
+
           setInterval(() => {
             if (!gotBought) {
               this.setState({
