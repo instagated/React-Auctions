@@ -1,12 +1,23 @@
 // TODO Check if this code is still up-to-date & optimize it a little bit
 import React, { Component, createRef } from "react";
 import Firebase, { firestore } from "../../Firebase";
-import { User } from "../../ApiHandler";
+import { User, Auction } from "../../ApiHandler";
 import { toast as toastConfig } from "../../config.json";
 import ToastService from "react-material-toast";
 // Components
 import { Link, Redirect } from "react-router-dom";
-import { Col, Form, ButtonGroup, Button, Nav, Tab, Table, Badge } from "react-bootstrap";
+import {
+  Col,
+  Form,
+  ButtonGroup,
+  Button,
+  Nav,
+  Tab,
+  Table,
+  Badge,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import Loader from "../../components/Loader";
 import { Offer, CreateOfferModal } from "../../components/Offer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,6 +27,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Profil.scss";
 
 const UserHandler = new User();
+const AuctionHandler = new Auction();
 
 class BuyHistory extends Component {
   constructor() {
@@ -27,7 +39,7 @@ class BuyHistory extends Component {
 
   componentDidMount() {
     const currentUser = Firebase.auth().currentUser;
-    const offerList = [];
+    var offerList = [];
 
     if (currentUser) {
       const userId = currentUser.uid;
@@ -183,6 +195,12 @@ class SellHistory extends Component {
                 offers.map((offer, index) => {
                   const now = Date.now() / 1000; // We're using timestamp in seconds
                   const expireDiff = offer.expiresAt.seconds - now;
+                  var isAuction = AuctionHandler.isAuction(offer);
+                  var gotBought = offer.bought !== undefined;
+                  var receivedBids = offer.bids !== undefined && offer.bids.length > 0;
+                  var username = gotBought ? offer.bought.username : "Kein Käufer";
+                  var highestBid = receivedBids ? offer.bids[offer.bids.length - 1] : null;
+
                   return (
                     <tr key={index} className="text-center">
                       <td>
@@ -195,9 +213,7 @@ class SellHistory extends Component {
                         )}
                       </td>
                       <td>
-                        <Badge variant="success">
-                          {offer.type === 1 ? "Auktion" : "Sofortkauf"}
-                        </Badge>
+                        <Badge variant="success">{isAuction ? "Auktion" : "Sofortkauf"}</Badge>
                       </td>
                       <td>
                         <Link
@@ -213,10 +229,14 @@ class SellHistory extends Component {
                         </p>
                       </td>
                       <td>
-                        {offer.bought !== undefined ? (
-                          <p className="font-weight-bold mb-0">{offer.bought.username}</p>
+                        {receivedBids ? (
+                          <OverlayTrigger
+                            overlay={<Tooltip id="tooltip-disabled">{highestBid.username}</Tooltip>}
+                          >
+                            <p className="font-weight-bold mb-0">{username}</p>
+                          </OverlayTrigger>
                         ) : (
-                          <p className="font-weight-bold mb-0">Kein Käufer</p>
+                          <p className="font-weight-bold mb-0">{username}</p>
                         )}
                       </td>
                     </tr>
